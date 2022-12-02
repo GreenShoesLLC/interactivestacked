@@ -1,0 +1,58 @@
+body{
+  margin: 0;
+  text-decoration: none;
+}
+
+.main{
+  min-width: 50vw;
+  min-height: 80vh;
+  background-color: lightblue;
+  padding: 0;
+}
+
+.content{
+  min-width: 90%;
+  min-height: 100%;
+  display: flex;
+  text-align: center;
+  overflow: auto;
+  margin: 10px;
+}
+
+.axis {
+  border: 0.1mm dashed gray;
+  min-height: 600px;
+  height:800px;
+  padding: 0;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.axis span {
+  display: block;
+  color:beige;
+  font-weight: bolder;
+  position: relative;
+}
+
+.axis span:hover {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+#mark{
+  text-align: center;
+  background: white;
+  color: black;
+  width: 50px;
+  border: 1px dashed gray;
+  border-left: none;
+  border-right: none;
+  padding: 5px;
+  height: 20px;
+}
+
+#data {
+  max-height: 760px;
+  z-index: 0;
+}
