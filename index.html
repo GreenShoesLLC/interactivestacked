@@ -6,13 +6,175 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="style.css">
 	</head>
 	<body>
-		<div class="main">
+
+		<div class="chart-container">
 			<div class="header">
+				<ul id = "menu">
+					<li class="title"><a href="javascript:void(0);">InterActive Chart</a></li>
+				</ul>
 			</div>
-			<div class="content">
+			<div class="body">
+				<div id="yaxis"></div>
+				<div id="content"></div>
 			</div>
 		</div>
+
 		<script src="interact.js"></script>
-		<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>  
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				var Portfolio = {
+					"Dev": [
+						{
+							"name": "A",
+							"strokecolor": "#990000",
+							"color": "#cc0000",
+							"prority": "1",
+							"start": "10",
+							"data": [3,2,3,4,10,1,2,3,4,5]
+						},
+						{
+							"name": "B",
+							"strokecolor": "#009900",
+							"color": "#00cc00",
+							"prority": "2",
+							"start": "5",
+							"data": [6,4,3,1,3,5,3]
+						},
+						{
+							"name": "C",
+							"strokecolor": "#006699",
+							"color": "#0088cc",
+							"prority": "3",
+							"start": "1",
+							"data": [8,2,1,1,1,4,3]
+						},
+						{
+							"name": "D",
+							"strokecolor": "#999900",
+							"color": "#cccc00",
+							"prority": "3",
+							"start": "3",
+							"data": [2,2,3,5,2,6,4,4,6,3,1]
+						},
+						{
+							"name": "E",
+							"strokecolor": "#3d5c5c",
+							"color": "#527a7a",
+							"prority": "3",
+							"start": "4",
+							"data": [2,2,3,5,2,6,4,4,6,3,1]
+						}
+					],
+					"QA": [
+						{
+							"name": "A",
+							"strokecolor": "#990000",
+							"color": "#cc0000",
+							"prority": "1",
+							"start": "10",
+							"data": [4,3,5,1,4,10,8,4,9,3]
+						},
+						{
+							"name": "B",
+							"strokecolor": "#009900",
+							"color": "#00cc00",
+							"prority": "2",
+							"start": "5",
+							"data": [3,4,3,1,3,3,3]
+						},
+						{
+							"name": "C",
+							"strokecolor": "#006699",
+							"color": "#0088cc",
+							"prority": "3",
+							"start": "4",
+							"data": [9,9,1,1,1,4,3]
+						},
+						{
+							"name": "D",
+							"strokecolor": "#999900",
+							"color": "#cccc00",
+							"prority": "3",
+							"start": "9",
+							"data": [3,4,5,5,2,6,4,4,6,3,1]
+						}
+						,
+						{
+							"name": "E",
+							"strokecolor": "#3d5c5c",
+							"color": "#527a7a",
+							"prority": "3",
+							"start": "10",
+							"data": [3,4,5,5,2,6,4,4,6,3,1]
+						}
+					],
+					"BA": [
+						{
+							"name": "A",
+							"strokecolor": "#990000",
+							"color": "#cc0000",
+							"prority": "1",
+							"start": "1",
+							"data": [7,3,5,1,4,10,8,4,9,3]
+						},
+						{
+							"name": "B",
+							"strokecolor": "#009900",
+							"color": "#00cc00",
+							"prority": "2",
+							"start": "2",
+							"data": [3,4,3,1,3,3,3]
+						},
+						{
+							"name": "C",
+							"strokecolor": "#006699",
+							"color": "#0088cc",
+							"prority": "3",
+							"start": "3",
+							"data": [9,9,1,1,1,4,3]
+						},
+						{
+							"name": "D",
+							"strokecolor": "#999900",
+							"color": "#cccc00",
+							"prority": "3",
+							"start": "5",
+							"data": [3,4,5,5,2,6,4,4,6,3,1]
+						},
+						{
+							"name": "E",
+							"strokecolor": "#3d5c5c",
+							"color": "#527a7a",
+							"prority": "3",
+							"start": "6",
+							"data": [3,4,5,5,2,6,4,4,6,3,1]
+						}
+					]
+				};
+
+				var Resources = {
+					"Dev": [5,5,5,5,3,5,1,3,5,3,6,3,2,5,6,7,6,6,6,7,7,7,7,7,7,8,8,8,8,9,9,10,10,9,9,8,9,9,10,10],
+					"QA": [3,3,3,5,3,3,3,5,5,4,4,4,4,4,4,4,4,6,6,7,7,7,7,7,7,8,8,8,8,9,9,10,10,9,9,8,9,9,10,10],
+					"BA": [1,1,4,4,7,7,8,8,8,8,8,4,4,4,4,4,4,6,6,7,3,3,3,3,3,3,3,6,9,9,10,10,9,9,8,9,9,10,10],
+				};
+
+				var axis = {
+					xaxis: {
+						min: 2022,
+						max: 2025,
+						label: "year/month",
+					},
+					yaxis: {
+						max: 30,
+						interval: 3,
+						label: "people"
+					}
+				}
+
+				var mychart = new interActiveChart(Portfolio, Resources, axis);
+			})
+			
+		</script>
 	</body>
 </html>

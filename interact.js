@@ -1,69 +1,172 @@
 
-let portfolio = {
-  "Developers": [
-    {
-      "name": "A",
-      "bordercolor": "#990000",
-      "color": "#cc0000",
-      "prority": "1",
-      "start": "1",
-      "data": [2,2,3,4,10,1,2,3,4,5]
-    },
-    {
-      "name": "B",
-      "bordercolor": "#009900",
-      "color": "#00cc00",
-      "prority": "2",
-      "start": "5",
-      "data": [6,4,3,1,3,5,3]
-    },
-    {
-      "name": "C",
-      "bordercolor": "#003d99",
-      "color": "#0052cc",
-      "prority": "3",
-      "start": "1",
-      "data": [7,2,1,1,1,4,3]
-    },
-    {
-      "name": "D",
-      "bordercolor": "#990099",
-      "color": "#cc00cc",
-      "prority": "3",
-      "start": "3",
-      "data": [2,2,3,5,2,6,4,4,6,3,1]
-    }
-  ]
-};
+let xaxis, yaxis;
+let P_Data, R_Data;
 
-let date = [2022, 2025]; // start , end year
-let { Developers } = portfolio;
+let Portfolio, Resources;
+let resType = {
+  'Developer': 'Dev',
+  'QA': 'QA',
+  'Business Analyst': 'BA'
+}
 
-let mouseDown;
-let method = null; // 0: move, 1: resize
-let oldX, oldY, selectedID;
-let timer = null;
-let is_draggle = false, state = false;
+let ongoing = [0,1,2,3], ready = [4];
 
-function buildAxis() {
+let mouseDown = null, is_draggle = false, state = false;
+let oldX, oldY, lastAt;
+let timer, method, displayRes = 'Developer';
+
+let unit = {};
+
+function drawXaxis() {
   let axis = '';
-  let content = document.getElementsByClassName("content");
-  let [start, end] = date;
+  let content = document.getElementById('content');
+  let start = parseInt(xaxis.min), end = parseInt(xaxis.max);
   for(let i=start; i<=end; i++){
     for(let j=0;j<10;j++){
       let id = j + 1 + (i-start) * 10;
-      let mark = j==0 ? i + '.' + (j+1): (j+1);
-      axis += `<div class="axis" id="s`+ id +`"><div id="mark">`+ mark +`</div><div class="data" id="t`+ id +`"></div></div>`;
+      axis += j == 0 ? `<div class="axis" id="s`+ id +`"><div id="mark" style="background: white">`+ i+`</div><div class="data" id="t`+ id +`"></div></div>` : `<div class="axis" id="s`+ id +`"><div id="mark">`+ (j+1)+`</div><div class="data" id="t`+ id +`"></div></div>`;
     }
   }
-  content[0].innerHTML = axis;
+  content.innerHTML = axis;
+}
+
+function drawYaxis() {
+  let m = document.getElementById('yaxis');
+  m.style.height = unit.dataHeight + 'px';
+  let max = parseInt(yaxis.max), interval = parseInt(yaxis.interval);
+  let axis = '';
+  let height = parseInt(unit.dataHeight)/(max/interval);
+  for(let i=0; i< max;){
+    i+=interval;
+    axis += `<div style="height:`+ height + `px">` + i +`</div>`;
+  }
+  m.innerHTML = axis;
+  unit.itemHeightUnit = height/interval;
+}
+
+
+function draw() {
+  P_Data.map((pro, i) => {
+    if(ongoing.filter((item) => (item == i)).length == 0)
+      return false;
+    pro.data.map((item, index) => {
+      let num = parseInt(pro.start) + index;
+      let id = 't' + num;
+      let box = document.getElementById(id);
+      let height = item * unit.itemHeightUnit;
+      let task = 
+      `<span class="container" id="`+ i + '-' + index +`" 
+        style="border-left:5px solid `+pro.strokecolor +`;border-top:2px solid `+pro.strokecolor +`;background:`+ pro.color + `;height:`+ height+'px'+`">
+        `+ pro.name + (index + 1) + `
+      </span>`;
+      box.innerHTML +=(task);
+    })
+  });
+
+  let data = document.querySelector('span');
+  unit.dataWidth = getComputedStyle(data).width;
+}
+
+function redraw(type) {
+  let span = document.getElementsByTagName('span');
+  while(span.length){
+    span[0].remove();
+  }
+
+  let capacity = document.getElementsByClassName('capacityLine');
+  while(capacity.length){
+    capacity[0].remove();
+  }
+  
+  P_Data = Portfolio[resType[type]], R_Data = Resources[resType[type]];
+  draw();
+  drawCapacityLine();
+}
+
+function drawMenu() {
+  let menu = `<li class="resource">
+      <a href="javascript:void(0);">Resources</a>
+      <div class="menu res-menu">
+        <nav>Developer</nav>
+        <nav>QA</nav>
+        <nav>Business Analyst</nav>
+      </div>
+    </li>
+    <li class="project">
+      <a href="javascript:void(0);">Project +/-</a>
+      <div class="menu pro-menu">
+        Ready
+        <div id="ready">
+          <Button id="E-4">E+</Button>
+        </div>
+        OnGoing
+        <div id="ongoing">
+          <Button id="A-0">A-</Button>
+          <Button id="B-1">B-</Button>
+          <Button id="C-2">C-</Button>
+          <Button id="D-3">D-</Button>
+        </div>
+      </div>
+    </li>`;
+    document.getElementById('menu').innerHTML += menu;
+}
+
+function drawCapacityLine() {
+  R_Data.map((item, i) => {
+    const para = document.createElement("div");
+    const left = document.getElementById('t'+(i+1));
+    para.className = 'capacityLine';
+    para.style.width = unit.markWidth + 'px';
+    para.style.top = unit.dataHeight - item*unit.itemHeightUnit + 'px';
+    para.style.border = '1px solid red';
+    para.style.position = 'absolute';
+    document.getElementById('s'+(i+1)).appendChild(para);;
+  });
+}
+
+function resize(e) {
+  let element = document.getElementById(selectedID);
+  clearTimeout(timer);
+  let select = selectedID.split('-');
+  let dataID = parseInt(P_Data[select[0]].start) + parseInt(select[1]);
+  timer = setTimeout(() => {
+    let step = oldY-e.pageY;
+    let height =  P_Data[select[0]].data[select[1]] + step/unit.itemHeightUnit;
+    let totalHeight = document.getElementById('t' + dataID).offsetHeight + step;
+    if(height <= 1 || unit.dataHeight <= totalHeight) 
+      return;
+    oldY = e.pageY;
+    P_Data[select[0]].data[select[1]] = height;
+    element.style.height = height * unit.itemHeightUnit + 'px';
+  }, 0);
+}
+
+// set span's position attribute absolute.
+function setAbsolute(ID){
+  let element = document.getElementById(ID);
+  let scrollX = document.getElementById('content').scrollLeft;
+  element.style.zIndex = '1';
+  element.style.width = unit.dataWidth;
+  let top = Math.abs(0 - element.offsetTop);
+  element.style.top = element.offsetTop + 'px';
+  element.style.left = element.offsetLeft - scrollX + 'px';
+  element.style.position = 'absolute';
+}
+
+// set span's position attribute relative.
+function setRelative(ID){
+  let element = document.getElementById(ID);
+  element.style.position = 'relative';
+  element.style.width = unit.dataWidth;
+  element.style.top = '0px';
+  element.style.left = '0px';
+  element.style.zIndex = '0';
 }
 
 function setMethod(e) {
   oldX = e.pageX;
   oldY = e.pageY;
   selectedID = e.target.id;
-
   if(e.offsetY <= 6){
     method = 1;
   }
@@ -73,38 +176,31 @@ function setMethod(e) {
   }
 }
 
-// set span's position attribute absolute.
-function setAbsolute(ID){
-  let element = document.getElementById(ID);
-  let [i, j] = ID.split('-');
-  let start = parseInt(Developers[parseInt(i)].start); 
-  let parentId = 't' + (start + parseInt(j));
-  let nodeList = document.getElementById(parentId).childNodes;
-  let total = 0;
-  element.style.position = 'absolute';
-  for (let index = nodeList.length - 1; index >= 0; index--) {
-    if(nodeList[index].id !== ID){
-      total += parseInt(nodeList[index].style.height);
+function addChild(e, at){
+  if(method == 0 && state){
+    let scrollX = document.getElementById('content').scrollLeft;
+    let relx = e.pageX + scrollX - unit.contentStart - 1;
+    let at = Math.ceil(relx/(parseInt(unit.markWidth) + 2));
+    let [i, j] = selectedID.split('-');
+    let start = parseInt(P_Data[parseInt(i)].start)-1;
+    let step = at - start - parseInt(j);
+    let length = P_Data[parseInt(i)].data.length;
+    if(isBoundary('t' + (start + step), 't' + (start + (length -1) + step)))
+      return false;
+    for(let index=0;index<length;index++){
+      let id  = parseInt(i) + '-' + index;
+      setRelative(id);
+      let select = document.getElementById(id);
+      let embed = document.getElementById('t' + (start + index + step));
+      embed.insertBefore(select, embed.children[0]);
     }
-    else{
-      total += parseInt(nodeList[index].style.height);
-      break;
-    }
+    P_Data[parseInt(i)].start = start + step;
   }
-  element.style.zIndex = '999';
-  element.style.width = '55px';
-  element.style.top = 780 - total + 'px';
-  element.style.left = 10 + (parseInt(Developers[parseInt(i)].start) + parseInt(j)-1)*62 + 'px';
 }
 
-// set span's position attribute relative.
-function setRelative(ID){
-  let element = document.getElementById(ID);
-  element.style.position = 'relative';
-  element.style.width = '55px';
-  element.style.top = '0px';
-  element.style.left = '0px';
-  element.style.zIndex = '0';
+function isBoundary(firstID, lastID) {
+  let first = document.getElementById(firstID), last = document.getElementById(lastID);
+  return (first == null) || (last == null);
 }
 
 function drag(e) {
@@ -113,104 +209,105 @@ function drag(e) {
       resize(e);
     }
     if(method == 0){
-      if(is_draggle){
-        
-      }
-      move(e, selectedID);
+      addChild(e);
     }
   }
 }
 
-function move(e, selectedID) {
-  let [i, j] = selectedID.split('-');
-  let length = Developers[parseInt(i)].data.length;
-  clearTimeout(timer);
-  timer = setTimeout(() => {
-    let stepX = e.pageX-oldX, stepY=e.pageY-oldY;
-    for(let index=0; index<length;index++){
-      let id  = parseInt(i) + '-' + index;
-      let element = document.getElementById(id);
-      element.style.top = parseInt(element.style.top) + stepY + 'px';
-      element.style.left = parseInt(element.style.left) + stepX + 'px';
+function changeCursor(e) {
+  if(e.target.tagName == 'SPAN'){
+    let element = document.getElementById(e.target.id);
+    if(e.offsetY < 6){
+      element.style.cursor = 'ns-resize';
+    } 
+    else {
+      element.style.cursor = 'pointer';
     }
-    oldX = e.pageX;
-    oldY = e.pageY;
-  }, 0);
-}
-
-function addChild(e){
-  if(method == 0 && state){
-    let relx = e.pageX - 10;
-    let at = Math.ceil(relx/62);
-    let [i, j] = selectedID.split('-');
-    let start = parseInt(Developers[parseInt(i)].start)-1;
-    let step = at - start - parseInt(j);
-    let length = Developers[parseInt(i)].data.length;
-    for(let index=0;index<length;index++){
-      let id  = parseInt(i) + '-' + index;
-      setRelative(id);
-      let select = document.getElementById(id);
-      let embed = document.getElementById('t' + (start + index + step));
-      embed.insertBefore(select, embed.children[0]);
-    }
-    Developers[parseInt(i)].start = start + step;
   }
 }
 
-function resize(e) {
-  let element = document.getElementById(selectedID);
-  clearTimeout(timer);
-  let select = selectedID.split('-')
-  timer = setTimeout(() => {
-    Developers[select[0]].data[select[1]] += (oldY-e.pageY)/30;
-    if(Developers[select[0]].data[select[1]] <= 0.7)
-      return;
-    oldY = e.pageY;
-    element.style.height = Developers[select[0]].data[select[1]] * 30 + 'px';
-  }, 0);
+function setUnit() {
+  let axis = document.getElementById('s1');
+  let max = (parseInt(xaxis.max) - parseInt(xaxis.min) + 1)*10;
+  let last = document.getElementById('s' + max);
+  let mark = document.getElementById('mark');
+  
+  let content = document.getElementById('content');
+
+  unit = {
+    markWidth: mark.offsetWidth,
+    contentStart: content.offsetLeft, 
+    contentEnd: last.offsetLeft,
+    dataHeight: axis.offsetHeight - mark.offsetHeight,
+    max: max
+  }
 }
 
-function draw() {
-  Developers.map((pro, i) => {
-    pro.data.map((item, index) => {
-      let num = parseInt(pro.start) + index;
-      let id = 't' + num;
-      let box = document.getElementById(id);
-      let height = item * 20;
-      let task = 
-      `<span class="container" id="`+ i + '-' + index +`" 
-        style="border-left:5px solid `+pro.bordercolor +`;border-top:2px solid `+pro.bordercolor +`;background:`+ pro.color + `;height:`+ height+'px'+`">
-        `+ pro.name + (index + 1) + `
-      </span>`;
-      box.innerHTML +=(task);
-    })
-  });
+class interActiveChart {
+  constructor(port, Res, a) {
+    Portfolio = port;
+    Resources = Res;
+    P_Data = Portfolio['Dev'], R_Data = Resources['Dev'], xaxis = a.xaxis, yaxis = a.yaxis;
+    drawXaxis();
+    setUnit();
+    drawYaxis();
+    draw();
+    drawCapacityLine();
+    drawMenu();
+  }
 }
 
 window.onload = () => {
-  buildAxis();
-  draw();
 
-  jQuery("span").on({
+  jQuery("Button").on({
+    mousedown:(e) => {
+      let parentId = e.target.parentElement.id;
+      let target = document.getElementById( parentId == 'ready' ? 'ongoing' : 'ready');
+      e.target.innerText = e.target.innerText.slice(0, -1) + (parentId == 'ready' ? '-':'+');
+      target.appendChild(e.target);
+      let taskId = e.target.id.split('-')[1];
+      if(parentId == 'ready'){
+        let index = ready.filter((item, i) => { 
+          if(item=== parseInt(taskId)){
+            return i+1;
+          }
+            
+        });
+        delete ready[index[0]];
+        ongoing.push(parseInt(taskId));
+      } 
+      else {
+        let index = ongoing.filter((item, i) => { 
+          if(item === parseInt(taskId)){
+            return i+1;
+          }
+        });
+        delete ongoing[index[0]];
+        ready.push(parseInt(taskId));
+      }
+      redraw(displayRes);
+  }});
+
+  jQuery("nav").on({
     mousedown: (e) => {
-      mouseDown = true;
-      setMethod(e);
-    },
-    mouseup: (e) => {
-      mouseDown = false;
-      addChild(e);
-      is_draggle = false;
-      state = false;
-      method = null;
-    },
+      displayRes = e.target.innerText;
+      redraw(displayRes);
+    }
   });
 
-  jQuery(".content").on({
+  jQuery("#content").on({
+    mousedown: (e) => {
+      if(e.target.tagName == 'SPAN'){
+        mouseDown = true;
+        setMethod(e);
+      }
+    },
     mousemove: (e) => {
+      changeCursor(e);
       if(mouseDown){
         if(is_draggle){
           let [i, j] = selectedID.split('-');
-          let length = Developers[parseInt(i)].data.length;
+          let length = P_Data[parseInt(i)].data.length;
           for(let index=0; index<length;index++){
             let id  = parseInt(i) + '-' + index;
             setAbsolute(id);
@@ -222,10 +319,14 @@ window.onload = () => {
         drag(e);
       }
     },
-    mouseup: () => {
-      method = null;
-      mouseDown = false;
-      clearTimeout(timer);
-    },
+    mouseup: (e) => {
+      if(mouseDown){
+        addChild(e);
+        method = null;
+        mouseDown = false;
+        state = false;
+      }
+    }
   });
+  
 }
