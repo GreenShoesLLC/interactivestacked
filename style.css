@@ -3,11 +3,12 @@ body{
 }
 
 .chart-container{
-  width: 80vw;
   background-color: #e6e6e6;
   padding: 0;
   user-select: none;
   border:1px solid green;
+  width: 95vw;
+  min-width: 450px;
 }
 
 #yaxis {
@@ -24,9 +25,7 @@ body{
 }
 
 #content{
-  min-width: 100px;
   height: 520px;
-  width: 97%;
   display: flex;
   text-align: center;
   overflow: auto;
@@ -35,8 +34,13 @@ body{
 }
 
 .header {
-  width:100%;
   border-bottom: 1px solid green;
+}
+
+.body {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
 }
 
 ul {
@@ -79,12 +83,11 @@ li.title {
 }
 
 .pro-menu {
-  min-width: 200px;
   padding: 10px;
 }
 
 .pro-menu > div {
-  padding:1px;
+  width: 200px;
 }
 
 .pro-menu > Button {
@@ -109,12 +112,6 @@ li.title {
   display: block;
 }
 
-.body {
-  padding: 2%;
-  display: flex;
-  flex-direction: row;
-}
-
 .axis {
   border: 1px dashed gray;
   border-top: none;
@@ -123,16 +120,14 @@ li.title {
   padding: 0;
   display: flex;
   flex-direction: column-reverse;
-  min-width: 45px;
-  width: 4%;
-  max-width: 4%;
+  min-width: 40px;
   position: relative;
 }
 
 .axis span {
   display: block;
   color:beige;
-  min-width: 40px;
+  min-width: 35px;
   font-weight: bolder;
   position: relative;
 }
@@ -155,6 +150,19 @@ li.title {
 
 #data {
   position: relative;
+}
+
+.capacityLine {
+  border:1px dashed red;
+  position: absolute;
+}
+
+.capacityLine:hover {
+  border: 1px solid blue;
+}
+
+.capacityLine:active {
+  border: 1px solid blue;
 }
 
 /* width */

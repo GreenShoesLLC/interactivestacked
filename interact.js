@@ -1,18 +1,20 @@
+import Data from './data.json' assert { type: 'json' };
+
+let { Portfolio, Resources, Axis, Project} = Data;
 
 let xaxis, yaxis;
 let P_Data, R_Data;
 
-let Portfolio, Resources;
 let resType = {
   'Developer': 'Dev',
   'QA': 'QA',
   'Business Analyst': 'BA'
 }
 
-let ongoing = [0,1,2,3], ready = [4];
+let ongoing = [0,1,2,3], ready = [4,5], selectedID, selectedTag, selectedClass, ctrlKey = false;
 
-let mouseDown = null, is_draggle = false, state = false;
-let oldX, oldY, lastAt;
+let mouseDown, lineDown = false, is_draggle = false, state = false;
+let oldX, oldY;
 let timer, method, displayRes = 'Developer';
 
 let unit = {};
@@ -49,22 +51,21 @@ function draw() {
   P_Data.map((pro, i) => {
     if(ongoing.filter((item) => (item == i)).length == 0)
       return false;
+    let {start, strokecolor, color} = Project[pro.name];
     pro.data.map((item, index) => {
-      let num = parseInt(pro.start) + index;
+      let num = parseInt(start) + index;
       let id = 't' + num;
       let box = document.getElementById(id);
       let height = item * unit.itemHeightUnit;
       let task = 
       `<span class="container" id="`+ i + '-' + index +`" 
-        style="border-left:5px solid `+pro.strokecolor +`;border-top:2px solid `+pro.strokecolor +`;background:`+ pro.color + `;height:`+ height+'px'+`">
+        style="border-left:5px solid `+strokecolor +`;border-top:2px solid `+ strokecolor +`;background:`+ color + `;height:`+ height+'px'+`">
         `+ pro.name + (index + 1) + `
       </span>`;
       box.innerHTML +=(task);
     })
   });
 
-  let data = document.querySelector('span');
-  unit.dataWidth = getComputedStyle(data).width;
 }
 
 function redraw(type) {
@@ -77,68 +78,84 @@ function redraw(type) {
   while(capacity.length){
     capacity[0].remove();
   }
-  
+
   P_Data = Portfolio[resType[type]], R_Data = Resources[resType[type]];
   draw();
   drawCapacityLine();
 }
 
 function drawMenu() {
-  let menu = `<li class="resource">
-      <a href="javascript:void(0);">Resources</a>
-      <div class="menu res-menu">
-        <nav>Developer</nav>
-        <nav>QA</nav>
-        <nav>Business Analyst</nav>
-      </div>
-    </li>
-    <li class="project">
-      <a href="javascript:void(0);">Project +/-</a>
-      <div class="menu pro-menu">
-        Ready
-        <div id="ready">
-          <Button id="E-4">E+</Button>
-        </div>
-        OnGoing
-        <div id="ongoing">
-          <Button id="A-0">A-</Button>
-          <Button id="B-1">B-</Button>
-          <Button id="C-2">C-</Button>
-          <Button id="D-3">D-</Button>
-        </div>
-      </div>
-    </li>`;
-    document.getElementById('menu').innerHTML += menu;
+  let box1 = document.getElementById('ready');
+  ready.map((item) => {
+    let button = document.createElement('Button');
+    button.style.cssText = 'margin:2px; display: inline-block;';
+    button.id = P_Data[item].name + '-' + item;
+    button.innerText =  P_Data[item].name + '+';
+    box1.appendChild(button);
+  });
+
+  let box2 = document.getElementById('ongoing');
+  ongoing.map((item) => {
+    let button = document.createElement('button');
+    button.style.cssText = 'margin:2px; display: inline-block;';
+    button.id = P_Data[item].name + '-' + item;
+    button.innerText =  P_Data[item].name + '-';
+    box2.appendChild(button);
+  });
 }
 
 function drawCapacityLine() {
   R_Data.map((item, i) => {
     const para = document.createElement("div");
-    const left = document.getElementById('t'+(i+1));
-    para.className = 'capacityLine';
+    para.classList.add('capacityLine');
+    para.id = 'c' + '-' + i;
     para.style.width = unit.markWidth + 'px';
     para.style.top = unit.dataHeight - item*unit.itemHeightUnit + 'px';
-    para.style.border = '1px solid red';
-    para.style.position = 'absolute';
     document.getElementById('s'+(i+1)).appendChild(para);;
   });
 }
 
 function resize(e) {
-  let element = document.getElementById(selectedID);
-  clearTimeout(timer);
-  let select = selectedID.split('-');
-  let dataID = parseInt(P_Data[select[0]].start) + parseInt(select[1]);
-  timer = setTimeout(() => {
-    let step = oldY-e.pageY;
-    let height =  P_Data[select[0]].data[select[1]] + step/unit.itemHeightUnit;
-    let totalHeight = document.getElementById('t' + dataID).offsetHeight + step;
-    if(height <= 1 || unit.dataHeight <= totalHeight) 
-      return;
-    oldY = e.pageY;
-    P_Data[select[0]].data[select[1]] = height;
-    element.style.height = height * unit.itemHeightUnit + 'px';
-  }, 0);
+  if(selectedTag == 'SPAN') {
+    let element = document.getElementById(selectedID);
+    clearTimeout(timer);
+    let [i, j] = selectedID.split('-');
+    let start = Project[P_Data[i].name].start;
+    let dataID = parseInt(start) + parseInt(j);
+    timer = setTimeout(() => {
+      let step = oldY-e.pageY;
+      let height =  P_Data[i].data[j] + step/unit.itemHeightUnit;
+      let totalHeight = document.getElementById('t' + dataID).offsetHeight + step;
+      if(height <= 1 || unit.dataHeight <= totalHeight) 
+        return;
+      oldY = e.pageY;
+      P_Data[i].data[j] = height;
+      element.style.height = height * unit.itemHeightUnit + 'px';
+    }, 0);
+  }
+  if(selectedClass == 'capacityLine') {
+    clearTimeout(timer);
+    let i = selectedID.split('-')[1];
+    timer = setTimeout(() => {
+      let step = oldY - e.pageY;
+      for(let j = ctrlKey ? 0 : i ; j < R_Data.length ; j++){
+        let element = document.getElementById('c-' + j);
+        let top = R_Data[j] + step/unit.itemHeightUnit;
+        element.style.top = unit.dataHeight - top*unit.itemHeightUnit + 'px';
+        R_Data[j] = top;
+      }
+      oldY = e.pageY;
+    }, 0);
+
+  }
+}
+
+function capacityColor(state) {
+  let i = selectedID.split('-')[1];
+  for(let j = ctrlKey ? 0 : i ; j < R_Data.length ; j++){
+    let element = document.getElementById('c-' + j);
+    element.style.border = state? '1px solid blue' : '1px dashed red';
+  }
 }
 
 // set span's position attribute absolute.
@@ -147,7 +164,6 @@ function setAbsolute(ID){
   let scrollX = document.getElementById('content').scrollLeft;
   element.style.zIndex = '1';
   element.style.width = unit.dataWidth;
-  let top = Math.abs(0 - element.offsetTop);
   element.style.top = element.offsetTop + 'px';
   element.style.left = element.offsetLeft - scrollX + 'px';
   element.style.position = 'absolute';
@@ -163,38 +179,25 @@ function setRelative(ID){
   element.style.zIndex = '0';
 }
 
-function setMethod(e) {
-  oldX = e.pageX;
-  oldY = e.pageY;
-  selectedID = e.target.id;
-  if(e.offsetY <= 6){
-    method = 1;
-  }
-  else{
-    method = 0;
-    is_draggle = true;
-  }
-}
-
-function addChild(e, at){
+function addChild(e){
   if(method == 0 && state){
     let scrollX = document.getElementById('content').scrollLeft;
     let relx = e.pageX + scrollX - unit.contentStart - 1;
     let at = Math.ceil(relx/(parseInt(unit.markWidth) + 2));
     let [i, j] = selectedID.split('-');
-    let start = parseInt(P_Data[parseInt(i)].start)-1;
+    let start = parseInt(Project[P_Data[i].name].start)-1;
     let step = at - start - parseInt(j);
     let length = P_Data[parseInt(i)].data.length;
     if(isBoundary('t' + (start + step), 't' + (start + (length -1) + step)))
       return false;
-    for(let index=0;index<length;index++){
+    for(let index = 0 ; index < length ; index++){
       let id  = parseInt(i) + '-' + index;
       setRelative(id);
       let select = document.getElementById(id);
       let embed = document.getElementById('t' + (start + index + step));
       embed.insertBefore(select, embed.children[0]);
     }
-    P_Data[parseInt(i)].start = start + step;
+    Project[P_Data[i].name].start = start + step;
   }
 }
 
@@ -205,7 +208,7 @@ function isBoundary(firstID, lastID) {
 
 function drag(e) {
   if(mouseDown){
-    if(method == 1){
+    if(method == 1 || lineDown ){
       resize(e);
     }
     if(method == 0){
@@ -224,68 +227,98 @@ function changeCursor(e) {
       element.style.cursor = 'pointer';
     }
   }
+
 }
 
-function setUnit() {
-  let axis = document.getElementById('s1');
-  let max = (parseInt(xaxis.max) - parseInt(xaxis.min) + 1)*10;
-  let last = document.getElementById('s' + max);
-  let mark = document.getElementById('mark');
+function setUnit(a) {
+  switch(a){
+    case 0:
+      let axis = document.getElementById('s1');
+      let max = (parseInt(xaxis.max) - parseInt(xaxis.min) + 1)*10;
+      let last = document.getElementById('s' + max);
+      let mark = document.getElementById('mark');
+      
+      let content = document.getElementById('content');
+
+      unit = {
+        markWidth: mark.offsetWidth,
+        contentStart: content.offsetLeft, 
+        contentEnd: last.offsetLeft,
+        dataHeight: axis.offsetHeight - mark.offsetHeight,
+        max: max
+      }
+      break;
+    case 1:
+      let data = document.querySelector('span');
+      unit.dataWidth = getComputedStyle(data).width;
+      break;
+  }
+}
+
+function changeProject(e){
+  let parentId = e.target.parentElement.id;
+  let target = document.getElementById( parentId == 'ready' ? 'ongoing' : 'ready');
+  e.target.innerText = e.target.innerText.slice(0, -1) + (parentId == 'ready' ? '-':'+');
+  target.appendChild(e.target);
+  let taskId = e.target.id.split('-')[1];
+  if(parentId == 'ready'){
+    let index = ready.indexOf(parseInt(taskId));
+    ongoing.push(ready.splice(index, 1)[0]);
+  } 
+  else {
+    let index = ongoing.indexOf(parseInt(taskId));
+    ready.push(ongoing.splice(index, 1)[0]);
+  }
+  redraw(displayRes);
+}
+
+function value_init() {
+  P_Data = Portfolio[resType[displayRes]], R_Data = Resources[resType[displayRes]], xaxis = Axis.xaxis, yaxis = Axis.yaxis;
+}
+
+function setMethod(e) {
+  oldX = e.pageX;
+  oldY = e.pageY;
+  selectedID = e.target.id;
+  selectedTag = e.target.tagName;
+  selectedClass = e.target.className;
+
+  mouseDown = true;
+  if(selectedTag == 'SPAN'){
+    if(e.offsetY <= 6){
+      method = 1;
+    }
+    else{
+      method = 0;
+      is_draggle = true;
+    }
+  }
+
+  if(selectedClass == 'capacityLine'){
+    lineDown = true;
+    capacityColor(true);
+  }
+}
+
+function main() {
+  value_init();
   
-  let content = document.getElementById('content');
-
-  unit = {
-    markWidth: mark.offsetWidth,
-    contentStart: content.offsetLeft, 
-    contentEnd: last.offsetLeft,
-    dataHeight: axis.offsetHeight - mark.offsetHeight,
-    max: max
-  }
-}
-
-class interActiveChart {
-  constructor(port, Res, a) {
-    Portfolio = port;
-    Resources = Res;
-    P_Data = Portfolio['Dev'], R_Data = Resources['Dev'], xaxis = a.xaxis, yaxis = a.yaxis;
-    drawXaxis();
-    setUnit();
-    drawYaxis();
-    draw();
-    drawCapacityLine();
-    drawMenu();
-  }
+  drawXaxis();
+  setUnit(0);
+  drawYaxis();
+  draw();
+  setUnit(1);
+  drawCapacityLine();
+  drawMenu();
 }
 
 window.onload = () => {
 
-  jQuery("Button").on({
+  main();
+
+  jQuery("button").on({
     mousedown:(e) => {
-      let parentId = e.target.parentElement.id;
-      let target = document.getElementById( parentId == 'ready' ? 'ongoing' : 'ready');
-      e.target.innerText = e.target.innerText.slice(0, -1) + (parentId == 'ready' ? '-':'+');
-      target.appendChild(e.target);
-      let taskId = e.target.id.split('-')[1];
-      if(parentId == 'ready'){
-        let index = ready.filter((item, i) => { 
-          if(item=== parseInt(taskId)){
-            return i+1;
-          }
-            
-        });
-        delete ready[index[0]];
-        ongoing.push(parseInt(taskId));
-      } 
-      else {
-        let index = ongoing.filter((item, i) => { 
-          if(item === parseInt(taskId)){
-            return i+1;
-          }
-        });
-        delete ongoing[index[0]];
-        ready.push(parseInt(taskId));
-      }
-      redraw(displayRes);
+      changeProject(e);
   }});
 
   jQuery("nav").on({
@@ -297,10 +330,7 @@ window.onload = () => {
 
   jQuery("#content").on({
     mousedown: (e) => {
-      if(e.target.tagName == 'SPAN'){
-        mouseDown = true;
-        setMethod(e);
-      }
+      setMethod(e);
     },
     mousemove: (e) => {
       changeCursor(e);
@@ -326,6 +356,18 @@ window.onload = () => {
         mouseDown = false;
         state = false;
       }
+      capacityColor(false);
+    }
+  });
+
+  jQuery("body").on({
+    keydown: (e) => {
+      if(e.ctrlKey){
+        ctrlKey = true;
+      }
+    },
+    keyup: () => {
+      ctrlKey = false;
     }
   });
   
