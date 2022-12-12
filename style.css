@@ -25,7 +25,7 @@ body{
 }
 
 #content{
-  height: 520px;
+  height: 620px;
   display: flex;
   text-align: center;
   overflow: auto;

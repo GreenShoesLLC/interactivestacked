@@ -11,7 +11,7 @@ let resType = {
   'Business Analyst': 'BA'
 }
 
-let ongoing = [0,1,2,3], ready = [4,5], selectedID, selectedTag, selectedClass, ctrlKey = false;
+let ongoing = [0,1,2,3,6,7,8,9,10,19,20], ready = [4,5,11,12,13,14,15,16,17,18], selectedID, selectedTag, selectedClass, ctrlKey = false;
 
 let mouseDown, lineDown = false, is_draggle = false, state = false;
 let oldX, oldY;
@@ -352,11 +352,11 @@ window.onload = () => {
     mouseup: (e) => {
       if(mouseDown){
         addChild(e);
-        method = null;
         mouseDown = false;
         state = false;
       }
       capacityColor(false);
+      lineDown = false;
     }
   });
 
