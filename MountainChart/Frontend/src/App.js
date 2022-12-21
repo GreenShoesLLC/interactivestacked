@@ -1,4 +1,5 @@
 import './App.css';
+import './chartstyle.css';
 import Main from './page/Main';
 
 const App = () => {
