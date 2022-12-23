@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toastr from 'toastr';
 
 export const getPortfolio = async (portfolioId) => {
   try {
@@ -17,6 +18,6 @@ export const getCapacity = async(filter) => {
     const res = await axios.post('/api/resourceportfoliocapacity', filter);
     return res.data.data;
   } catch(err) {
-
+    toastr.error('Server Error', 'Server is not working.');
   }
 }

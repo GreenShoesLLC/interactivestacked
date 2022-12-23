@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useRef, createRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, createRef } from 'react';
 
-import Data from 'Database/data.json';
-import { getPortfolio, getCapacity } from 'store/actions/resourceAction';
-
-const ChartBody = ({chartId, filter}) => {
+const ChartBody = (props) => {
 
   const [unit, setUnit] = useState({
       markWidth: 0,
@@ -12,46 +9,36 @@ const ChartBody = ({chartId, filter}) => {
       dataHeight: 0,
       max: 0
   });
+
   const [projectData, setProjectData] = useState({});
-  const [portfolioData, setPortfolioData] = useState({});
   const [displayData, setDisplayData] = useState([]);
   const [capacityData, setCapacityData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [label, setLabel] = useState({});
+  const [loading, setLoading] = useState(props.loading);
 
-  const dataRef = useRef([]), markRef = useRef(null), xAxisRef = useRef([]), yAxisRef = useRef(null);
+  const dataRef = useRef([]), markRef = useRef(null), xAxisRef = useRef([]), yAxisRef = useRef(null), bodyRef = useRef(null), labelRef = useRef(null);
 
-  const { Axis } = Data;
-  const { axisX, axisY } = Axis;
-  let oldX, oldY, mouseDown, selectedID, selectedTag, selectedClass, is_draggle, method, state, lineDown, ctrlKey; 
+  const { chartId, stateChange } = props;
+  let oldX, oldY, moveUpDown, mouseDown, selectedID, selectedTag, selectedClass, method, state, lineDown, ctrlKey; 
   let timer;
+
+  useEffect(() => {
+    const { demand, capacity, project, AxisXLabel, AxisYLabel } = props.datasource;
+    setDisplayData(demand);
+    setCapacityData(capacity);
+    setProjectData(project);
+    setLabel({X:AxisXLabel, Y:AxisYLabel});
+    setLoading(props.loading);
+  }, [props]);
   
-  useEffect(() => {
-    drawYaxis();
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    getPortfolio(filter.portfolio)
-      .then(({tmpProject, tmpDemand}) => {
-        setPortfolioData(tmpDemand);
-        setDisplayData(tmpDemand[filter.resource]);
-        setProjectData(tmpProject);
-        setLoading(false);
-      })
-  }, [filter.portfolio]);
-
-  useEffect(() => {
-    console.log(filter);
-    getCapacity(filter)
-      .then((res) => {
-        setCapacityData(res);
-      })
-  }, [filter.resource])
-
   useEffect(()=> {
+    drawYaxis();
+  }, [displayData]);
+
+  useEffect(() => {
     draw();
     drawCapacityLine();
-  }, [portfolioData]);
+  }, [unit]);
 
   if(dataRef.current.length !== 50){
     dataRef.current = Array(50)
@@ -70,7 +57,7 @@ const ChartBody = ({chartId, filter}) => {
         pro.data.map((item, index) => {
           const box = dataRef.current[parseInt(start) + index - 1];
           const node = document.createElement('span');
-          node.innerText = pro.name + (index + 1);
+          node.innerText = `${pro.name}(${item})`;
           node.id = `${chartId}-${i}-${index}`;
           node.className = 'con';
           node.style.cssText = `background:${color};border: 1px solid ${strokecolor};border-top: 1px solid ${strokecolor};height:` + item*unit.itemHeightUnit + `px`;
@@ -80,10 +67,8 @@ const ChartBody = ({chartId, filter}) => {
         return true;
       });
     }
-    
-
   }
-
+  
   const drawCapacityLine = () => {
     if(capacityData){
       capacityData.map((item, i) => {
@@ -99,24 +84,40 @@ const ChartBody = ({chartId, filter}) => {
   }
 
   const drawYaxis = ()  => {
+    let { AxisXMin, AxisXMax, AxisYMax, AxisYInterval } = props.datasource;
+
+    if(!AxisYMax && displayData){
+      let max = 0;
+      displayData.map((item) => {
+        max += Math.max(...item.data);
+        return true;
+      });
+      AxisYMax = max/3;
+    }
+
+    const bodyPadding = parseInt(getComputedStyle(bodyRef.current).paddingLeft || 0);
     let tmpUnit = {
       markWidth: markRef.current.offsetWidth,
-      contentStart: xAxisRef.current[0].current.offsetLeft,
+      contentStart: xAxisRef.current[0].current.offsetLeft + bodyPadding,
       contentEnd: xAxisRef.current[xAxisRef.current.length-1].current.offsetLeft,
       dataHeight: xAxisRef.current[0].current.offsetHeight - markRef.current.offsetHeight,
-      max: (parseInt(axisX.max) - parseInt(axisX.min) + 1)*10
+      max: (parseInt(AxisXMax) - parseInt(AxisXMin) + 1)*10
     };
 
     const box = yAxisRef.current;
 
+    while (box.firstChild) {
+      box.removeChild(box.lastChild);
+    }
+
     box.style.height = tmpUnit.dataHeight + 'px';
-    const max = parseInt(axisY.max), interval = parseInt(axisY.interval), height = parseInt(tmpUnit.dataHeight)/(max/interval);
+    const max = parseInt(AxisYMax), interval = parseInt(AxisYInterval), height = parseInt(tmpUnit.dataHeight)/(max/interval);
     tmpUnit.itemHeightUnit = height/interval;
     
     setUnit(tmpUnit);
 
     let m = [];
-    while(m.length < max/interval){
+    while(m.length < Math.ceil(max/interval)){
       m.push((m.length+1)*interval);
     };
 
@@ -131,7 +132,8 @@ const ChartBody = ({chartId, filter}) => {
   }
 
   const XItem = () => {
-    let start = parseInt(axisX.min), end = parseInt(axisX.max);
+    const { AxisXMin, AxisXMax } = props.datasource;
+    let start = parseInt(AxisXMin), end = parseInt(AxisXMax);
     let x = [];
     for(let i=0; i<=(end-start);i++){
       for(let j=0; j<10;j++){
@@ -153,6 +155,18 @@ const ChartBody = ({chartId, filter}) => {
     ));
   };
 
+  const onDemandChange = () => {
+    if(stateChange){
+      stateChange({state: 'demand', data: displayData});
+    }
+  }
+
+  const onCapacityChange = () => {
+    if(stateChange){
+      stateChange({state: 'capacity', data: capacityData});
+    }
+  }
+
   //draggle Functions
   const draggleMethod = (e) => {
     oldX = e.pageX;
@@ -163,13 +177,15 @@ const ChartBody = ({chartId, filter}) => {
 
     mouseDown = true;
     if(selectedTag === 'SPAN'){
+
       if(e.offsetY <= 6){
         method = 1;
       }
       else{
         method = 0;
-        is_draggle = true;
       }
+      
+      changeInnerText();
     }
 
     if(selectedClass === 'capacityLine'){
@@ -185,26 +201,6 @@ const ChartBody = ({chartId, filter}) => {
       element.style.border = state? '1px solid #0000cc' : '1px dashed #cc0000';
     }
   }
-  // set span's position attribute absolute.
-  const setAbsolute = (ID) => {
-    let element = document.getElementById(ID);
-    let scrollX = document.getElementById(`content${chartId}`).scrollLeft;
-    element.style.zIndex = '1';
-    element.style.width = unit.dataWidth;
-    element.style.top = element.offsetTop + 'px';
-    element.style.left = element.offsetLeft - scrollX + 'px';
-    element.style.position = 'absolute';
-  }
-
-  // set span's position attribute relative.
-  const setRelative = (ID) => {
-    let element = document.getElementById(ID);
-    element.style.position = 'relative';
-    element.style.width = unit.dataWidth;
-    element.style.top = '0px';
-    element.style.left = '0px';
-    element.style.zIndex = '0';
-  }
 
   const drag = (e) => {
     if(method === 1 || lineDown){
@@ -212,6 +208,24 @@ const ChartBody = ({chartId, filter}) => {
     }
     if(method === 0){
       addChild(e);
+    }
+  }
+
+  const changeInnerText = () => {
+    let i = selectedID.split('-').slice(1)[0];
+    let length =  displayData[parseInt(i)].data.length;
+    for(let index = 0; index < length; index++){
+      let id  = `${chartId}-${parseInt(i)}-${index}`;
+      let span = document.getElementById(id);
+      if(mouseDown && (method === 0)){
+        span.innerText = `${span.innerText.split('(')[0]}-${index+1}`;
+        span.style.borderWidth = '2px';
+      }
+      if(!mouseDown && (method === 0)){
+        span.innerText = `${span.innerText.split('-')[0]}(${Math.round(displayData[i].data[index])})`;
+        span.style.borderWidth = '1px';
+      }
+        
     }
   }
 
@@ -226,17 +240,42 @@ const ChartBody = ({chartId, filter}) => {
       let length = displayData[parseInt(i)].data.length;
 
       if(isBoundary(start + step, start + (length -1) + step))
-        return false;
-        
-      for(let index = 0 ; index < length ; index++){
-        let id  = `${chartId}-${parseInt(i)}-${index}`;
-        setRelative(id);
-        let select = document.getElementById(id);
-        let embed = dataRef.current[start + index + step - 1].current;
-        embed.insertBefore(select, embed.children[0]);
+        return false;  
+
+      if((step-1) !== 0 ){
+        for(let index = 0 ; index < length ; index++){
+          let id  = `${chartId}-${parseInt(i)}-${index}`;
+          let select = document.getElementById(id);
+          let embed = dataRef.current[start + index + step - 1].current;
+          embed.insertBefore(select, embed.children[0]);
+        }
+        state = false;
+        projectData[displayData[i].name].start = start + step;
       }
-      state = false;
-      projectData[displayData[i].name].start = start + step;
+      else {
+        if( moveUpDown && (e.pageY > oldY) ) {
+          for(let index = 0 ; index < length ; index++){
+            let id  = `${chartId}-${parseInt(i)}-${index}`;
+            // setRelative(id);
+            let select = document.getElementById(id);
+            let embed = select.parentNode;
+            if(select.nextSibling)
+              embed.insertBefore(select.nextSibling, select);
+          }    
+        }
+        if( moveUpDown && (e.pageY < oldY) ) {
+          for(let index = 0 ; index < length ; index++){
+            let id  = `${chartId}-${parseInt(i)}-${index}`;
+            // setRelative(id);
+            let select = document.getElementById(id);
+            let embed = select.parentNode;
+            if(select.previousSibling)
+              embed.insertBefore(select, select.previousSibling);
+          } 
+        }  
+        oldY = e.pageY;
+        moveUpDown = false;
+      }
     }
   }
 
@@ -248,7 +287,7 @@ const ChartBody = ({chartId, filter}) => {
     if(selectedTag === 'SPAN' && !state) {
       let element = document.getElementById(selectedID);
       clearTimeout(timer);
-      let [i, j] = selectedID.split('-').slice(1);
+      let [i, j] = selectedID.split('-').slice(1); 
       timer = setTimeout(() => {
         let step = oldY-e.pageY;
         let height =  displayData[i].data[j] + step/unit.itemHeightUnit;
@@ -258,6 +297,7 @@ const ChartBody = ({chartId, filter}) => {
         oldY = e.pageY;
         displayData[i].data[j] = height;
         element.style.height = height * unit.itemHeightUnit + 'px';
+        element.innerText = `${element.innerText.split('(')[0]}(${Math.round(height)})`;
       }, 0);
     }
 
@@ -276,7 +316,7 @@ const ChartBody = ({chartId, filter}) => {
       }, 0);
   
     }
-  }
+  }  
 
   //mouse event handle function 
   const handle = (e) => {
@@ -288,26 +328,29 @@ const ChartBody = ({chartId, filter}) => {
       case 'mousemove':
         changeCursor(e);
         if(mouseDown){
-          if(is_draggle && method === 0){
-            let i = selectedID.split('-')[1];
-            let length = displayData[parseInt(i)].data.length;
-            for(let index=0; index<length;index++){
-              let id  = `${chartId}-${parseInt(i)}-${index}`;
-              setAbsolute(id);
-            }
-  
-          }
           if(method === 0) state = true;
-          is_draggle = false;
           drag(e);
         }
         break;
       case 'mouseup':
         mouseDown = false;
+        if(selectedTag === 'SPAN'){
+          changeInnerText();
+          onDemandChange();
+        }
         method = null;
+        if(lineDown) {
+          onCapacityChange();
+        }
         lineDown = false;
         state = false;
+        moveUpDown = false;
         capacityColor(false);
+        break;
+      case 'mouseout':
+        if((e.target.id === selectedID) && mouseDown) {
+          moveUpDown = true;
+        }
         break;
       default:
         break;
@@ -316,9 +359,9 @@ const ChartBody = ({chartId, filter}) => {
 
   const changeCursor = (e) => {
     
-    if(e.target.tagName === 'SPAN'){
+    if((e.target.tagName === 'SPAN')){
       let element = document.getElementById(e.target.id);
-      if(e.offsetY < 6){
+      if((e.offsetY < 6) && (method !== 0) && (!moveUpDown)){
         element.style.cursor = 'ns-resize';
       } 
       else {
@@ -337,12 +380,19 @@ const ChartBody = ({chartId, filter}) => {
 
   return (
     <>
-      <div className="body">
+      <div className="body" ref={bodyRef}>
+        <div className="label label-y" ref={labelRef}>
+          { 
+            label.Y?<nav>{label.Y}</nav>:''
+          }
+        </div>
+        <div>{label.x}</div>
         <div id="yaxis" ref={yAxisRef}></div>
         <div className="content"
           id={`content${chartId}`} 
           onMouseMove={handle} 
           onMouseUp={handle} 
+          onMouseOut={handle}
           onMouseDown={handle}>
           {
             loading?(
@@ -353,6 +403,10 @@ const ChartBody = ({chartId, filter}) => {
           }
         </div>
       </div>
+      {
+          label.X?<div className="label label-x"><nav>{label.X}</nav></div>:''
+      }
+      
     </>
   )
 }
