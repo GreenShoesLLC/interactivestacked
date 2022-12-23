@@ -34,7 +34,7 @@ const ChartBody = (props) => {
   
   useEffect(()=> {
     drawYaxis();
-  }, [displayData]);
+  }, [projectData, capacityData]);
 
   useEffect(() => {
     draw();
