@@ -19,6 +19,7 @@ const ChartBody = (props) => {
   const dataRef = useRef([]), markRef = useRef(null), xAxisRef = useRef([]), yAxisRef = useRef(null), bodyRef = useRef(null), labelRef = useRef(null);
 
   const { chartId, stateChange } = props;
+  let { AxisXMax, AxisXMin, AxisYMax, AxisYInterval } = props.datasource;
   let oldX, oldY, moveUpDown, mouseDown, selectedID, selectedTag, selectedClass, method, state, lineDown, ctrlKey; 
   let timer;
 
@@ -40,11 +41,11 @@ const ChartBody = (props) => {
     drawCapacityLine();
   }, [unit]);
 
-  if(dataRef.current.length !== 50){
-    dataRef.current = Array(50)
+  if(dataRef.current.length !== (AxisXMax-AxisXMin+1)*10){
+    dataRef.current = Array((AxisXMax-AxisXMin+1)*10)
       .fill()
       .map((_, i) => dataRef.current[i] || createRef());
-    xAxisRef.current = Array(50)
+    xAxisRef.current = Array((AxisXMax-AxisXMin+1)*10)
       .fill()
       .map((_, i) => xAxisRef.current[i] || createRef());
   }
@@ -54,8 +55,12 @@ const ChartBody = (props) => {
     if(displayData){
       displayData.map((pro, i) => {
         const { start, strokecolor, color } = projectData[pro.name];
+        const [year, month] = start.split('.');
+        const startAt = (parseInt(year)-AxisXMin)*10 + parseInt(month);
         pro.data.map((item, index) => {
-          const box = dataRef.current[parseInt(start) + index - 1];
+          if(!dataRef.current[ startAt + index - 1])
+            return false;
+          const box = dataRef.current[ startAt + index - 1];
           const node = document.createElement('span');
           node.innerText = `${pro.name}(${item})`;
           node.id = `${chartId}-${i}-${index}`;
@@ -84,8 +89,6 @@ const ChartBody = (props) => {
   }
 
   const drawYaxis = ()  => {
-    let { AxisXMin, AxisXMax, AxisYMax, AxisYInterval } = props.datasource;
-
     if(!AxisYMax && displayData){
       let max = 0;
       displayData.map((item) => {
@@ -177,14 +180,12 @@ const ChartBody = (props) => {
 
     mouseDown = true;
     if(selectedTag === 'SPAN'){
-
       if(e.offsetY <= 6){
         method = 1;
       }
       else{
         method = 0;
       }
-      
       changeInnerText();
     }
 
@@ -217,6 +218,8 @@ const ChartBody = (props) => {
     for(let index = 0; index < length; index++){
       let id  = `${chartId}-${parseInt(i)}-${index}`;
       let span = document.getElementById(id);
+      if(!span)
+        continue;
       if(mouseDown && (method === 0)){
         span.innerText = `${span.innerText.split('(')[0]}-${index+1}`;
         span.style.borderWidth = '2px';
@@ -224,8 +227,7 @@ const ChartBody = (props) => {
       if(!mouseDown && (method === 0)){
         span.innerText = `${span.innerText.split('-')[0]}(${Math.round(displayData[i].data[index])})`;
         span.style.borderWidth = '1px';
-      }
-        
+      } 
     }
   }
 
@@ -235,29 +237,43 @@ const ChartBody = (props) => {
       let relx = e.pageX + scrollX - unit.contentStart - 1;
       let at = Math.ceil(relx/(parseInt(unit.markWidth) + 2));
       let [i, j] = selectedID.split('-').slice(1);
-      let start = parseInt(projectData[displayData[i].name].start)-1;
+      let [year, month] = projectData[displayData[i].name].start.split('.');
+      let start = (parseInt(year) - AxisXMin)*10 + parseInt(month)-1;
       let step = at - start - parseInt(j);
       let length = displayData[parseInt(i)].data.length;
 
-      if(isBoundary(start + step, start + (length -1) + step))
+      if(isBoundary(start + step, start + (length -1) + step) && (parseInt(year) >= AxisXMin))
         return false;  
 
       if((step-1) !== 0 ){
-        for(let index = 0 ; index < length ; index++){
+        let color = projectData[displayData[i].name].color, strokecolor = projectData[displayData[i].name].strokecolor;
+        for(let index = length-1 ; index >=0 ; index--){
           let id  = `${chartId}-${parseInt(i)}-${index}`;
           let select = document.getElementById(id);
+          if(!select){
+            select = document.createElement('span');
+            let item = displayData[i].data[index];
+            select.innerText = `${displayData[i].name}-${index+1}`;
+            select.id = `${chartId}-${i}-${index}`;
+            select.className = 'con';
+            select.style.cssText = `background:${color};border: 1px solid ${strokecolor};border-top: 1px solid ${strokecolor};height:` + item*unit.itemHeightUnit + `px`;
+          }
+          if(!dataRef.current[start + index + step - 1])
+            continue;
           let embed = dataRef.current[start + index + step - 1].current;
           embed.insertBefore(select, embed.children[0]);
         }
         state = false;
-        projectData[displayData[i].name].start = start + step;
+        let y = Math.floor((start + step)/10) + AxisXMin, m = (start + step)%10 === 0 ? 10 : (start + step)%10;
+        projectData[displayData[i].name].start = `${y}.${m}`;
       }
       else {
         if( moveUpDown && (e.pageY > oldY) ) {
           for(let index = 0 ; index < length ; index++){
             let id  = `${chartId}-${parseInt(i)}-${index}`;
-            // setRelative(id);
             let select = document.getElementById(id);
+            if(!select)
+              continue;
             let embed = select.parentNode;
             if(select.nextSibling)
               embed.insertBefore(select.nextSibling, select);
@@ -266,8 +282,9 @@ const ChartBody = (props) => {
         if( moveUpDown && (e.pageY < oldY) ) {
           for(let index = 0 ; index < length ; index++){
             let id  = `${chartId}-${parseInt(i)}-${index}`;
-            // setRelative(id);
             let select = document.getElementById(id);
+            if(!select)
+              continue;
             let embed = select.parentNode;
             if(select.previousSibling)
               embed.insertBefore(select, select.previousSibling);

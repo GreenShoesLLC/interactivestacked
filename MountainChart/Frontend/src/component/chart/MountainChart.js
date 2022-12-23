@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useId } from 'react-id-generator'
 
 import CBody from './chart.body';
