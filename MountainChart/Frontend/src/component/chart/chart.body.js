@@ -77,6 +77,8 @@ const ChartBody = (props) => {
   const drawCapacityLine = () => {
     if(capacityData){
       capacityData.map((item, i) => {
+        if(!dataRef.current[i])
+          return false;
         const box = dataRef.current[i];
         const node = document.createElement('div');
         node.classList.add('capacityLine');
@@ -199,6 +201,8 @@ const ChartBody = (props) => {
     let i = selectedID.split('-')[1];
     for(let j = ctrlKey ? 0 : i ; j < capacityData.length ; j++){
       let element = document.getElementById(`${chartId}-${j}`);
+      if(!element)
+        continue;
       element.style.border = state? '1px solid #0000cc' : '1px dashed #cc0000';
     }
   }
@@ -325,6 +329,8 @@ const ChartBody = (props) => {
         let step = oldY - e.pageY;
         for(let j = ctrlKey ? 0 : i ; j < capacityData.length ; j++){
           let element = document.getElementById(`${chartId}-${j}`);
+          if(!element)
+            continue;
           let top = capacityData[j] + step/unit.itemHeightUnit;
           element.style.top = unit.dataHeight - top*unit.itemHeightUnit + 'px';
           capacityData[j] = top;

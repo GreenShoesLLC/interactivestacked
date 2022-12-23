@@ -46,7 +46,7 @@ const Main = () => {
     });
   }
 
-  const sourceChange = (change) => {
+  const onSourceChange = (change) => {
     const {state, data} = change;
     switch(state){
       case 'demand':
@@ -106,7 +106,7 @@ const Main = () => {
         AxisXLabel = {'Time'}
         AxisYLabel = {'people'}
         AxisYInterval = {5}
-        stateChange = { sourceChange }
+        stateChange = { onSourceChange }
         loading = {loading}
         />
       <MountainChart  
@@ -114,12 +114,12 @@ const Main = () => {
         demand = {portfolioData}
         capacity = {resourceData}
         project = {projectData}
-        AxisXMin = {2022}
+        AxisXMin = {2023}
         AxisXMax = {2026}
         AxisXLabel = {'year/month'}
         AxisYMax = {40}
         AxisYInterval = {5}
-        stateChange = { sourceChange }
+        stateChange = { onSourceChange }
         loading = {loading}
         />
     </>
