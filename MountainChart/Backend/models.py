@@ -1,11 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-
-# session_options={"expire_on_commit": False} =>
-# would allow to manipulate out of date models
-# after a transaction has been committed
-# ! be aware that the above can have unintended side effects
-db = SQLAlchemy()
-
+from app import db
 
 class Todo(db.Model):
     __tablename__ = "Project"
