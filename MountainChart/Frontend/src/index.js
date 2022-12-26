@@ -6,6 +6,8 @@ import { Provider } from 'react-redux';
 import App from './App';
 import { store } from './store';
 import config from './config';
+import 'toastr/toastr.js';
+import 'toastr/build/toastr.css';
 
 import * as serviceWorker from './serviceWorker';
 

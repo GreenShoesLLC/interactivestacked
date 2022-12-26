@@ -27,16 +27,13 @@ const Main = () => {
 
   useEffect(() => {
     setLoading(true);
-    getPortfolio(filter.portfolio)
-      .then(({tmpProject, tmpDemand}) => {
-        setPortfolioData(tmpDemand[filter.resource]);
-        setProjectData(tmpProject);
-        setLoading(false);
-      });
-    getCapacity(filter)
-      .then((res) => {
-        setResourceData(res);
-      });
+    Promise.all([getPortfolio(filter.portfolio), getCapacity(filter)]).then(res => {
+      const [port, cap] = res;
+      setPortfolioData(port.tmpDemand[filter.resource]);
+      setProjectData(port.tmpProject);
+      setResourceData(cap);
+      setLoading(false);
+    });
   }, [filter]);
 
   const handleMethod = () => {
@@ -107,6 +104,7 @@ const Main = () => {
         AxisYLabel = {'people'}
         AxisYInterval = {5}
         stateChange = { onSourceChange }
+        filter = { filter }
         loading = {loading}
         />
       <MountainChart  
@@ -120,6 +118,7 @@ const Main = () => {
         AxisYMax = {40}
         AxisYInterval = {5}
         stateChange = { onSourceChange }
+        filter = { filter }
         loading = {loading}
         />
     </>

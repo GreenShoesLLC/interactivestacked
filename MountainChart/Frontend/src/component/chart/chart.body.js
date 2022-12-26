@@ -16,7 +16,12 @@ const ChartBody = (props) => {
   const [label, setLabel] = useState({});
   const [loading, setLoading] = useState(props.loading);
 
-  const dataRef = useRef([]), markRef = useRef(null), xAxisRef = useRef([]), yAxisRef = useRef(null), bodyRef = useRef(null), labelRef = useRef(null);
+  const dataRef = useRef([]);
+  const markRef = useRef(null); 
+  const xAxisRef = useRef([]);
+  const yAxisRef = useRef(null);
+  const bodyRef = useRef(null);
+  const labelRef = useRef(null);
 
   const { chartId, stateChange } = props;
   let { AxisXMax, AxisXMin, AxisYMax, AxisYInterval } = props.datasource;
@@ -34,38 +39,39 @@ const ChartBody = (props) => {
   
   useEffect(()=> {
     drawYaxis();
-  }, [displayData]);
+  }, [projectData, capacityData]);
 
   useEffect(() => {
     draw();
     drawCapacityLine();
   }, [unit]);
 
-  if(dataRef.current.length !== (AxisXMax-AxisXMin+1)*10){
-    dataRef.current = Array((AxisXMax-AxisXMin+1)*10)
+  if(dataRef.current.length !== (AxisXMax - AxisXMin + 1) * 10) {
+    dataRef.current = Array( (AxisXMax - AxisXMin + 1) * 10 )
       .fill()
       .map((_, i) => dataRef.current[i] || createRef());
-    xAxisRef.current = Array((AxisXMax-AxisXMin+1)*10)
+    xAxisRef.current = Array( (AxisXMax - AxisXMin + 1) * 10 )
       .fill()
       .map((_, i) => xAxisRef.current[i] || createRef());
   }
 
   //init functions
   const draw = () => {
-    if(displayData){
+    if(displayData) {
       displayData.map((pro, i) => {
         const { start, strokecolor, color } = projectData[pro.name];
         const [year, month] = start.split('.');
-        const startAt = (parseInt(year)-AxisXMin)*10 + parseInt(month);
+        const startAt = (parseInt(year) - AxisXMin) * 10 + parseInt(month);
         pro.data.map((item, index) => {
-          if(!dataRef.current[ startAt + index - 1])
-            return false;
+          if(!dataRef.current[ startAt + index - 1]) { return false; }
           const box = dataRef.current[ startAt + index - 1];
           const node = document.createElement('span');
           node.innerText = `${pro.name}(${item})`;
           node.id = `${chartId}-${i}-${index}`;
           node.className = 'con';
-          node.style.cssText = `background:${color};border: 1px solid ${strokecolor};border-top: 1px solid ${strokecolor};height:` + item*unit.itemHeightUnit + `px`;
+          node.style.cssText = 
+            `background:${color};border: 1px solid ${strokecolor};
+            border-top: 1px solid ${strokecolor};height:${item*unit.itemHeightUnit}px`;
           box.current.appendChild(node);
           return true;
         })
@@ -75,15 +81,15 @@ const ChartBody = (props) => {
   }
   
   const drawCapacityLine = () => {
-    if(capacityData){
+    if(capacityData) {
       capacityData.map((item, i) => {
-        if(!dataRef.current[i])
-          return false;
+        if(!dataRef.current[i]) { return false; }
         const box = dataRef.current[i];
         const node = document.createElement('div');
         node.classList.add('capacityLine');
         node.id = `${chartId}-${i}`;
-        node.style.cssText = `width: ${unit.markWidth}px;top:${unit.dataHeight - item * unit.itemHeightUnit}px`;
+        node.style.cssText = 
+          `width: ${unit.markWidth}px;top:${unit.dataHeight - item * unit.itemHeightUnit}px`;
         box.current.appendChild(node);
         return true;
       });
@@ -91,7 +97,7 @@ const ChartBody = (props) => {
   }
 
   const drawYaxis = ()  => {
-    if(!AxisYMax && displayData){
+    if(!AxisYMax && displayData) {
       let max = 0;
       displayData.map((item) => {
         max += Math.max(...item.data);
@@ -101,29 +107,32 @@ const ChartBody = (props) => {
     }
 
     const bodyPadding = parseInt(getComputedStyle(bodyRef.current).paddingLeft || 0);
+
     let tmpUnit = {
       markWidth: markRef.current.offsetWidth,
       contentStart: xAxisRef.current[0].current.offsetLeft + bodyPadding,
       contentEnd: xAxisRef.current[xAxisRef.current.length-1].current.offsetLeft,
       dataHeight: xAxisRef.current[0].current.offsetHeight - markRef.current.offsetHeight,
-      max: (parseInt(AxisXMax) - parseInt(AxisXMin) + 1)*10
+      max: (parseInt(AxisXMax) - parseInt(AxisXMin) + 1) * 10
     };
 
     const box = yAxisRef.current;
 
-    while (box.firstChild) {
+    while(box.firstChild) {
       box.removeChild(box.lastChild);
     }
 
-    box.style.height = tmpUnit.dataHeight + 'px';
-    const max = parseInt(AxisYMax), interval = parseInt(AxisYInterval), height = parseInt(tmpUnit.dataHeight)/(max/interval);
+    box.style.height = `${tmpUnit.dataHeight}px`;
+    const max = parseInt(AxisYMax);
+    const interval = parseInt(AxisYInterval);
+    const height = parseInt(tmpUnit.dataHeight)/(max/interval);
     tmpUnit.itemHeightUnit = height/interval;
     
     setUnit(tmpUnit);
 
     let m = [];
-    while(m.length < Math.ceil(max/interval)){
-      m.push((m.length+1)*interval);
+    while( m.length < Math.ceil(max/interval) ) {
+      m.push( (m.length + 1) * interval );
     };
 
     m.map((item) => {
@@ -137,11 +146,11 @@ const ChartBody = (props) => {
   }
 
   const XItem = () => {
-    const { AxisXMin, AxisXMax } = props.datasource;
-    let start = parseInt(AxisXMin), end = parseInt(AxisXMax);
+    const start = parseInt(AxisXMin);
+    const end = parseInt(AxisXMax);
     let x = [];
-    for(let i=0; i<=(end-start);i++){
-      for(let j=0; j<10;j++){
+    for(let i = 0; i <= (end - start); i++){
+      for(let j = 0; j < 10; j++){
         x.push({
           year: i + start,
           month: j,
@@ -181,54 +190,53 @@ const ChartBody = (props) => {
     selectedClass = e.target.className;
 
     mouseDown = true;
-    if(selectedTag === 'SPAN'){
-      if(e.offsetY <= 6){
+    if(selectedTag === 'SPAN') {
+      if(e.offsetY <= 6) {
         method = 1;
-      }
-      else{
+      } else {
         method = 0;
       }
       changeInnerText();
     }
 
-    if(selectedClass === 'capacityLine'){
+    if(selectedClass === 'capacityLine') {
       lineDown = true;
       capacityColor(true);
     }
   }
 
   const capacityColor = (state) => {
-    let i = selectedID.split('-')[1];
-    for(let j = ctrlKey ? 0 : i ; j < capacityData.length ; j++){
+    const i = selectedID.split('-')[1];
+    for(let j = ctrlKey ? 0 : i; j < capacityData.length; j++) {
       let element = document.getElementById(`${chartId}-${j}`);
-      if(!element)
-        continue;
-      element.style.border = state? '1px solid #0000cc' : '1px dashed #cc0000';
+      if(!element) continue;
+      element.style.border = state ? '1px solid #0000cc' : '1px dashed #cc0000';
     }
   }
 
   const drag = (e) => {
-    if(method === 1 || lineDown){
+    if(method === 1 || lineDown) {
       reSize(e);
     }
-    if(method === 0){
+    if(method === 0) {
       addChild(e);
     }
   }
 
   const changeInnerText = () => {
-    let i = selectedID.split('-').slice(1)[0];
-    let length =  displayData[parseInt(i)].data.length;
-    for(let index = 0; index < length; index++){
-      let id  = `${chartId}-${parseInt(i)}-${index}`;
+    const i = selectedID.split('-').slice(1)[0];
+    const length =  displayData[parseInt(i)].data.length;
+
+    for(let index = 0; index < length; index++) {
+      const id  = `${chartId}-${parseInt(i)}-${index}`;
       let span = document.getElementById(id);
-      if(!span)
-        continue;
-      if(mouseDown && (method === 0)){
+      
+      if(!span) continue;
+      if(mouseDown && (method === 0)) {
         span.innerText = `${span.innerText.split('(')[0]}-${index+1}`;
         span.style.borderWidth = '2px';
       }
-      if(!mouseDown && (method === 0)){
+      if(!mouseDown && (method === 0)) {
         span.innerText = `${span.innerText.split('-')[0]}(${Math.round(displayData[i].data[index])})`;
         span.style.borderWidth = '1px';
       } 
@@ -236,62 +244,68 @@ const ChartBody = (props) => {
   }
 
   const addChild = (e) => {
-    if(method === 0 && state && selectedID){
-      let scrollX = document.getElementById(`content${chartId}`).scrollLeft;
-      let relx = e.pageX + scrollX - unit.contentStart - 1;
-      let at = Math.ceil(relx/(parseInt(unit.markWidth) + 2));
-      let [i, j] = selectedID.split('-').slice(1);
-      let [year, month] = projectData[displayData[i].name].start.split('.');
-      let start = (parseInt(year) - AxisXMin)*10 + parseInt(month)-1;
-      let step = at - start - parseInt(j);
-      let length = displayData[parseInt(i)].data.length;
+    if(method === 0 && state && selectedID) {
+      const scrollX = document.getElementById(`content${chartId}`).scrollLeft;
+      const relx = e.pageX + scrollX - unit.contentStart - 1;
+      const at = Math.ceil(relx/(parseInt(unit.markWidth) + 2));
+      const [i, j] = selectedID.split('-').slice(1);
+      const [year, month] = projectData[displayData[i].name].start.split('.');
+      const start = (parseInt(year) - AxisXMin) * 10 + parseInt(month) - 1;
+      const step = at - start - parseInt(j);
+      const length = displayData[parseInt(i)].data.length;
 
-      if(isBoundary(start + step, start + (length -1) + step) && (parseInt(year) >= AxisXMin))
-        return false;  
+      if(isBoundary(start + step, start + (length -1) + step) && (parseInt(year) >= AxisXMin)) { return false; }
 
-      if((step-1) !== 0 ){
-        let color = projectData[displayData[i].name].color, strokecolor = projectData[displayData[i].name].strokecolor;
-        for(let index = length-1 ; index >=0 ; index--){
-          let id  = `${chartId}-${parseInt(i)}-${index}`;
+      if((step-1) !== 0) {
+        const color = projectData[displayData[i].name].color;
+        const strokecolor = projectData[displayData[i].name].strokecolor;
+
+        for(let index = length-1; index >=0; index--) {
+          const id  = `${chartId}-${parseInt(i)}-${index}`;
           let select = document.getElementById(id);
-          if(!select){
+          if(!select) {
+            const item = displayData[i].data[index];
             select = document.createElement('span');
-            let item = displayData[i].data[index];
             select.innerText = `${displayData[i].name}-${index+1}`;
-            select.id = `${chartId}-${i}-${index}`;
+            select.id = id;
             select.className = 'con';
-            select.style.cssText = `background:${color};border: 1px solid ${strokecolor};border-top: 1px solid ${strokecolor};height:` + item*unit.itemHeightUnit + `px`;
+            select.style.cssText = 
+              `background:${color};border: 1px solid ${strokecolor};
+              border-top: 1px solid ${strokecolor};height:${item*unit.itemHeightUnit}px`;
           }
-          if(!dataRef.current[start + index + step - 1])
-            continue;
+          if(!dataRef.current[start + index + step - 1]) continue;
           let embed = dataRef.current[start + index + step - 1].current;
           embed.insertBefore(select, embed.children[0]);
         }
         state = false;
-        let y = Math.floor((start + step)/10) + AxisXMin, m = (start + step)%10 === 0 ? 10 : (start + step)%10;
+
+        const y = Math.floor( (start + step)/10 ) + AxisXMin
+        const m = (start + step) % 10 === 0 ? 10 : (start + step) % 10;
         projectData[displayData[i].name].start = `${y}.${m}`;
       }
       else {
         if( moveUpDown && (e.pageY > oldY) ) {
-          for(let index = 0 ; index < length ; index++){
-            let id  = `${chartId}-${parseInt(i)}-${index}`;
+          for(let index = 0 ; index < length ; index++) {
+            const id  = `${chartId}-${parseInt(i)}-${index}`;
             let select = document.getElementById(id);
-            if(!select)
-              continue;
+
+            if(!select) continue;
             let embed = select.parentNode;
-            if(select.nextSibling)
+            if(select.nextSibling) {
               embed.insertBefore(select.nextSibling, select);
+            }
           }    
         }
         if( moveUpDown && (e.pageY < oldY) ) {
-          for(let index = 0 ; index < length ; index++){
-            let id  = `${chartId}-${parseInt(i)}-${index}`;
+          for(let index = 0; index < length; index++) {
+            const id  = `${chartId}-${parseInt(i)}-${index}`;
             let select = document.getElementById(id);
-            if(!select)
-              continue;
+            if(!select) continue;
             let embed = select.parentNode;
-            if(select.previousSibling)
+            if(select.previousSibling) {
               embed.insertBefore(select, select.previousSibling);
+            }
+              
           } 
         }  
         oldY = e.pageY;
