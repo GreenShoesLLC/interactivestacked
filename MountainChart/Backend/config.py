@@ -1,16 +1,14 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config(object):
+    """Base Config Object"""
     DEBUG = False
-    TESTING = False
-    CSRF_ENABLED = True
-    SECRET_KEY = os.getenv('SECRET', 'Oh my god they were roommates.')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'Som3$ec5etK*y')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'mysql+pymysql://root:@127.0.0.1:3306/test_db') 
 
-class ProductionConfig(Config):
-    DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-
-class DevelopmentConfig(Config):
-    DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://postgres:root@localhost:5432/postgres')
+    # This is just here to suppress a warning from SQLAlchemy as it will soon be removed
+    # postgresql://postgres:root@localhost:5432/postgres
+    SQLALCHEMY_TRACK_MODIFICATIONS = False 

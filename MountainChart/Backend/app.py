@@ -1,10 +1,9 @@
 from init import create_app
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
+from models import db
 
 app = create_app()
 # bootstrap database migrate commands
-db = SQLAlchemy()
 db.init_app(app)
 migrate = Migrate(app, db)
 
