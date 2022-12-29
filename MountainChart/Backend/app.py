@@ -12,10 +12,10 @@ bcrypt = Bcrypt(app)
 
 if __name__ == "__main__":
 
-    app.run(host="0.0.0.0")
+  app.run(host="0.0.0.0")
 
-    # production Deployment WSGI server
+  # production Deployment WSGI server
 
-    # from gevent.pywsgi import WSGIServer
-    # http_server = WSGIServer(('0.0.0.0', 8000), app)
-    # http_server.serve_forever()
+  # from gevent.pywsgi import WSGIServer
+  # http_server = WSGIServer(('0.0.0.0', 8000), app)
+  # http_server.serve_forever()
