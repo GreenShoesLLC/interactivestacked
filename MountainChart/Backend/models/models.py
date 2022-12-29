@@ -1,6 +1,6 @@
 from models.base import BaseModel, db
 
-import datetime
+from datetime import datetime
 
 class Tenant(db.Model, BaseModel):
 
@@ -10,11 +10,11 @@ class User(db.Model, BaseModel):
 
   __tablename__ = 'User'
 
-  now = datetime.datetime.utcnow
+  now = datetime.utcnow
   
   TenantId = db.Column(db.Integer, db.ForeignKey(Tenant.Id), nullable=False)
   Email = db.Column(db.String(30), nullable=False, unique=True)
-  Password = db.Column(db.String(40), nullable=False)
+  Password = db.Column(db.String(100), nullable=False)
   CreatedAt = db.Column(db.DateTime, nullable=False, default=now)
   UpdatedAt = db.Column(db.DateTime, nullable=False, default=now, onupdate=now)
   Deleted = db.Column(db.Boolean, default=0)
@@ -24,7 +24,7 @@ class Workspace(db.Model, BaseModel):
   
   __tablename__ = 'Workspace'
 
-  now = datetime.datetime.utcnow
+  now = datetime.utcnow
 
   TenantId = db.Column(db.Integer, db.ForeignKey(Tenant.Id), nullable=False)
   StatusDate = db.Column(db.DateTime, nullable=False, default=now)
@@ -49,6 +49,8 @@ class Resource(db.Model, BaseModel):
 
   WorkspaceId = db.Column(db.Integer, db.ForeignKey(Workspace.Id), nullable=False)
   BaselineCapacity = db.Column(db.Text)
+  StartAt = db.Column(db.DateTime, nullable=False)
+  Tags = db.Column(db.String(20), nullable=False)
 
 class ProjectResource(db.Model):
 
@@ -63,23 +65,23 @@ class Portfolio(db.Model):
 
   __tablename__ = 'Portfolio'
 
-  now = datetime.datetime.utcnow
+  now = datetime.utcnow
 
   Id = db.Column(db.String(40), primary_key=True)
   Name = db.Column(db.String(30), nullable=False)
   WorkspaceId = db.Column(db.Integer, db.ForeignKey(Workspace.Id), nullable=False)
   StatusDate = db.Column(db.DateTime, nullable=False, default=now)
   CreatedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
-  LastModifiedBuUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
+  LastModifiedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
 
 class PortfolioProject(db.Model):
 
   __tablename__ = 'PortfolioProject'
 
   Id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-  PortfolioId = db.Column(db.Integer, db.ForeignKey(Portfolio.Id), nullable=False)
+  PortfolioId = db.Column(db.String(40), db.ForeignKey(Portfolio.Id), nullable=False)
   ProjectId = db.Column(db.Integer, db.ForeignKey(Project.Id), nullable=False)
-  IsSelected = db.Column(db.Boolean, default=False)
+  IsSelected = db.Column(db.Boolean, default=0)
   AdjustedStartDate = db.Column(db.DateTime, nullable=False)
   AdjustedPriority = db.Column(db.Integer, nullable=False)
 
@@ -88,8 +90,8 @@ class PortfolioResource(db.Model):
   __tablename__ = 'PortfolioResource'
 
   Id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-  PortfolioId = db.Column(db.Integer, db.ForeignKey(Portfolio.Id), nullable=False)
-  ProjectId = db.Column(db.Integer, db.ForeignKey(Project.Id), nullable=False)
+  PortfolioId = db.Column(db.String(40), db.ForeignKey(Portfolio.Id), nullable=False)
+  ResourceId = db.Column(db.Integer, db.ForeignKey(Resource.Id), nullable=False)
   AdjustedCapacity = db.Column(db.Text)
 
 class PortfolioProjectResource(db.Model):
