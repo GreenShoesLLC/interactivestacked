@@ -27,7 +27,7 @@ class Workspace(db.Model, BaseModel):
   now = datetime.utcnow
 
   TenantId = db.Column(db.Integer, db.ForeignKey(Tenant.Id), nullable=False)
-  StatusDate = db.Column(db.DateTime, nullable=False, default=now)
+  StatusDate = db.Column(db.Date, nullable=False, default=now)
   Description = db.Column(db.Text, nullable=True)
   CreatedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
   CreatedAt = db.Column(db.DateTime, nullable=False, default=now)

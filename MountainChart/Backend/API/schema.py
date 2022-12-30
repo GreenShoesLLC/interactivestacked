@@ -10,7 +10,6 @@ import graphene
 
 class Query(graphene.ObjectType):
   """Nodes which can be queried by this API."""
-  node = graphene.relay.Node.Field()
   
   workspace = graphene.relay.Node.Field(Workspace)
   workspaceList = SQLAlchemyConnectionField(Workspace)

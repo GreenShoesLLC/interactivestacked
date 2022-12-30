@@ -3,13 +3,14 @@ from .utils import input_to_dictionary
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from models import db, Workspace as WorkspaceModel
 from graphene import relay, InputObjectType, Mutation
+from datetime import datetime
 
 class WorkspaceAttribute:
-  TenantId = graphene.String()
+  TenantId = graphene.Int()
   Name = graphene.String()
   StatusDate = graphene.Date()
   Description = graphene.String()
-  CreateByUserId = graphene.Int()
+  CreatedByUserId = graphene.Int()
   SharedUsers = graphene.String()
 
 class Workspace(SQLAlchemyObjectType):
@@ -29,7 +30,7 @@ class CreateWorkspace(Mutation):
   
   def mutate(self, info, input):
     data = input_to_dictionary(input)
-
+    
     new_workspace = WorkspaceModel(**data)
     new_workspace.save()
 
@@ -47,11 +48,18 @@ class UpdateWorkspace(Mutation):
   def mutate(self, info, input):
     data = input_to_dictionary(input)
 
-    workspace = db.session.query(WorkspaceModel).filter_by(Id=data['Id']).first()
-    workspace.update(data)
+    uworkspace = db.session.query(WorkspaceModel).filter_by(Id=data['Id']).first()
+
+    uworkspace.Name = data['Name']
+    uworkspace.TenantId = data['TenantId']
+    uworkspace.StatusDate = data['StatusDate']
+    uworkspace.Descritption = data['Description']
+    uworkspace.CreatedByUserId = data['CreatedByUserId']
+    uworkspace.SharedUsers = data['SharedUsers']
+
     db.session.commit()
 
-    return CreateWorkspace(ok=True, workspace=workspace)
+    return UpdateWorkspace(ok=True, workspace=uworkspace)
 
 class DeleteWorkspaceInput(InputObjectType, WorkspaceAttribute):
   Id = graphene.Int()
@@ -65,9 +73,9 @@ class DeleteWorkspace(Mutation):
   def mutate(self, info, input):
     data = input_to_dictionary(input)
 
-    workspace = db.session.query(WorkspaceModel).filter_by(Id=data['Id']).first()
-    db.session.delete(workspace)
+    dworkspace = db.session.query(WorkspaceModel).filter_by(Id=data['Id']).first()
+    db.session.delete(dworkspace)
     db.session.commit()
 
-    return DeleteWorkspace(ok=True)
+    return DeleteWorkspace(workspace=dworkspace)
 

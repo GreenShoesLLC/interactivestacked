@@ -14,6 +14,8 @@ def password(password_plaintext):
 
 with app.app_context():
 
+  db.drop_all()
+  db.create_all()
   # Add a new Tenant
   developer = Tenant( Name='Developer' )
   developer.save()
@@ -29,11 +31,12 @@ with app.app_context():
   user.save()
 
   # Add a new Workspace to the Tenant
+
   workspace = Workspace(
     TenantId = 1,
-    Name = 'workspace',
-    StatusDate = datetime.strptime('01/01/2023', '%m/%d/%Y').date(),
-    Description = '',
+    Name = 'team',
+    StatusDate = datetime.strptime('05/01/2025', '%m/%d/%Y').date(),
+    Description = 'chart to manage team member',
     CreatedByUserId = 1
   )
   workspace.save()
