@@ -35,7 +35,7 @@ with app.app_context():
   workspace = Workspace(
     TenantId = 1,
     Name = 'team',
-    StatusDate = datetime.strptime('05/01/2025', '%m/%d/%Y').date(),
+    StatusDate = datetime.strptime('2025-05-01', '%Y-%m-%d').date(),
     Description = 'chart to manage team member',
     CreatedByUserId = 1
   )
@@ -55,7 +55,7 @@ with app.app_context():
         WorkspaceId = 1,
         Name = Resources[i],
         BaselineCapacity = json.dumps(BaselineCapacity[i]),
-        StartAt = datetime.strptime('01/01/2023', '%m/%d/%Y').date(),
+        StartAt = datetime.strptime('2023-01-01', '%Y-%m-%d').date(),
         Tags = ''
       )
     )
@@ -65,7 +65,7 @@ with app.app_context():
   print('Resources Created!')
 
   # Add 10 Projects to that Workspace
-  BaselineStartDate = ['01/01/2023', '02/01/2023', '03/01/2023', '04/01/2023', '05/01/2023', '06/01/2023', '07/01/2023', '08/01/2023', '09/01/2023', '10/01/2023']
+  BaselineStartDate = ['2023-01-01', '2023-02-01', '2023-03-01', '2023-04-01', '2023-05-01', '2023-06-01', '2023-07-01', '2023-08-01', '2023-09-01', '2023-10-01']
   Name = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
   Projects = []
   Priority = []
@@ -75,7 +75,7 @@ with app.app_context():
       Project(
         WorkspaceId = 1,
         Name = Name[i],
-        BaselineStartDate = datetime.strptime(BaselineStartDate[i], '%m/%d/%Y').date(),
+        BaselineStartDate = datetime.strptime(BaselineStartDate[i], '%Y-%m-%d').date(),
         BaselinePriority = Priority[i]
       )
     )
@@ -108,7 +108,7 @@ with app.app_context():
     Id = '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d4',
     WorkspaceId = 1,
     Name = 'Developer',
-    StatusDate = datetime.strptime('01/01/2023', '%m/%d/%Y').date(),
+    StatusDate = datetime.strptime('2023-01-01', '%Y-%m-%d').date(),
     CreatedByUserId = 1,
     LastModifiedByUserId = 1
   )
