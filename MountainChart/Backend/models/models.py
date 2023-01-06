@@ -34,6 +34,7 @@ class Workspace(db.Model, BaseModel):
   UpdatedAt = db.Column(db.DateTime, nullable=False, default=now, onupdate=now)
   SharedUsers = db.Column(db.Text, nullable=True)
 
+
 class Project(db.Model, BaseModel):
 
   __tablename__ = 'Project'
@@ -43,6 +44,8 @@ class Project(db.Model, BaseModel):
   BaselinePriority = db.Column(db.Integer, default=100)
   Tags = db.Column(db.String(20), nullable=True)
 
+  workspace = db.relationship('Workspace', backref='projects')
+
 class Resource(db.Model, BaseModel):
 
   __tablename__ = 'Resource'
@@ -51,6 +54,8 @@ class Resource(db.Model, BaseModel):
   BaselineCapacity = db.Column(db.Text)
   StartAt = db.Column(db.DateTime, nullable=False)
   Tags = db.Column(db.String(20), nullable=False)
+
+  workspace = db.relationship('Workspace', backref='resources')
 
 class ProjectResource(db.Model):
 

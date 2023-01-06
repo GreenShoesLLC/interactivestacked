@@ -1,4 +1,5 @@
 import graphene
+import uuid
 from .utils import input_to_dictionary
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from models import db, Portfolio as PortfolioModel
@@ -28,17 +29,20 @@ class CreatePortfolio(Mutation):
   
   def mutate(self, info, input):
     data = input_to_dictionary(input)
+    data['Id'] = uuid.uuid4()
 
     new_portfolio = PortfolioModel(**data)
     new_portfolio.save()
+    
 
     return CreatePortfolio(Portfolio=new_portfolio)
 
 class UpdatePortfolioInput(InputObjectType, PortfolioAttribute):
-  Id = graphene.Int()
+  Id = graphene.String()
 
 class UpdatePortfolio(Mutation):
   portfolio = graphene.Field(lambda: Portfolio)
+  ok = graphene.Boolean()
 
   class Arguments:
     input = UpdatePortfolioInput(required=True)
@@ -47,7 +51,13 @@ class UpdatePortfolio(Mutation):
     data = input_to_dictionary(input)
 
     portfolio = db.session.query(PortfolioModel).filter_by(Id=data['Id']).first()
-    Portfolio.update(data)
+    
+    portfolio.Name = data['Name']
+    portfolio.WorkspaceId = data['WorkspaceId']
+    portfolio.StatusDate = data['StatusDate']
+    portfolio.CreatedByUserId =  data['CreatedByUserId']
+    portfolio.LastModifiedByUserId = data['LastModifiedByUserId']
+
     db.session.commit()
 
     return CreatePortfolio(ok=True, portfolio=portfolio)
@@ -57,6 +67,7 @@ class DeletePortfolioInput(InputObjectType, PortfolioAttribute):
 
 class DeletePortfolio(Mutation):
   portfolio = graphene.Field(lambda: Portfolio)
+  ok = graphene.Boolean()
 
   class Arguments:
     input = DeletePortfolioInput(required=True)
@@ -65,8 +76,10 @@ class DeletePortfolio(Mutation):
     data = input_to_dictionary(input)
 
     portfolio = db.session.query(PortfolioModel).filter_by(Id=data['Id']).first()
-    db.session.delete(portfolio)
-    db.session.commit()
 
-    return DeletePortfolio(ok=True)
+    if portfolio:
+      portfolio.remove()
+      return DeletePortfolio(ok=True)
+      
+    return DeletePortfolio(ok=False)
 

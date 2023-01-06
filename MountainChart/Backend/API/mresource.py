@@ -39,6 +39,8 @@ class UpdateResourceInput(InputObjectType, MResourceAttribute):
 
 class UpdateResource(Mutation):
   resource = graphene.Field(lambda: MResource)
+  ok = graphene.Boolean()
+
 
   class Arguments:
     input = UpdateResourceInput(required=True)
@@ -47,7 +49,12 @@ class UpdateResource(Mutation):
     data = input_to_dictionary(input)
 
     resource = db.session.query(ResourceModel).filter_by(Id=data['Id']).first()
-    resource.update(data)
+    
+    resource.WorkspaceId = data['WorkspaceId']
+    resource.Name = data['Name']
+    resource.BaselineCapacity = data['BaselineCapacity']
+    resource.Tags = data['Tags']
+
     db.session.commit()
 
     return UpdateResource(ok=True, resource=resource)
@@ -57,6 +64,7 @@ class DeleteResourceInput(InputObjectType, MResourceAttribute):
 
 class DeleteResource(Mutation):
   resource = graphene.Field(lambda: MResource)
+  ok = graphene.Boolean()
 
   class Arguments:
     input = DeleteResourceInput(required=True)
@@ -65,8 +73,10 @@ class DeleteResource(Mutation):
     data = input_to_dictionary(input)
 
     resource = db.session.query(ResourceModel).filter_by(Id=data['Id']).first()
-    db.session.delete(resource)
-    db.session.commit()
 
-    return DeleteResource(ok=True)
+    if resource:
+      resource.remove()
+      return DeleteResource(ok=True)
+
+    return DeleteResource(ok=False)
 

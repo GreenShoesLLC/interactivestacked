@@ -39,6 +39,7 @@ class UpdateProjectInput(InputObjectType, ProjectAttribute):
 
 class UpdateProject(Mutation):
   project = graphene.Field(lambda: Project)
+  ok = graphene.Boolean()
 
   class Arguments:
     input = UpdateProjectInput(required=True)
@@ -46,17 +47,24 @@ class UpdateProject(Mutation):
   def mutate(self, info, input):
     data = input_to_dictionary(input)
 
-    project = db.session.query(ProjectModel).filter_by(Id=data['Id']).first()
-    project.update(data)
+    uproject = db.session.query(ProjectModel).filter_by(Id=data['Id']).first()
+    
+    uproject.Name = data['Name']
+    uproject.WorkspaceId = data['WorkspaceId']
+    uproject.BaselineStartDate = data['BaselineStartDate']
+    uproject.BaselinePriority = data['BaselinePriority']
+    uproject.Tags = data['Tags']
+
     db.session.commit()
 
-    return UpdateProject(ok=True, project=project)
+    return UpdateProject(ok=True, project=uproject)
 
 class DeleteProjectInput(InputObjectType, ProjectAttribute):
   Id = graphene.Int()
 
 class DeleteProject(Mutation):
   project = graphene.Field(lambda: Project)
+  ok = graphene.Boolean()
 
   class Arguments:
     input = DeleteProjectInput(required=True)
@@ -65,8 +73,10 @@ class DeleteProject(Mutation):
     data = input_to_dictionary(input)
 
     project = db.session.query(ProjectModel).filter_by(Id=data['Id']).first()
-    db.session.delete(project)
-    db.session.commit()
 
-    return DeleteProject(ok=True)
+    if project:
+      project.remove()
+      return DeleteProject(ok=True)
+      
+    return DeleteProject(ok=False)
 

@@ -31,6 +31,7 @@ class CreatePortProject(Mutation):
     project = db.session.query(ProjectModel).filter_by(Id=data['ProjectId']).first()
     data['AdjustedStartDate'] = project.BaselineStartDate
     data['AdjustedPriority'] = project.BaselinePriority
+    
     new_portProject = PortProjectModel(**data)
     new_portProject.save()
 
@@ -41,6 +42,7 @@ class UpdatePortProjectInput(InputObjectType, PortProjectAttribute):
 
 class UpdatePortProject(Mutation):
   portProject = graphene.Field(lambda: PortProject)
+  ok = graphene.Boolean()
 
   class Arguments:
     input = UpdatePortProjectInput(required=True)
@@ -59,6 +61,7 @@ class DeletePortProjectInput(InputObjectType, PortProjectAttribute):
 
 class DeletePortProject(Mutation):
   portProject = graphene.Field(lambda: PortProject)
+  ok = graphene.Boolean()
 
   class Arguments:
     input = DeletePortProjectInput(required=True)

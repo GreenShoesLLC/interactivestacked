@@ -30,6 +30,7 @@ class CreatePortResource(Mutation):
 
     resource = db.session.query(ResourceModel).filter_by(Id=data['ResourceId']).first()
     data['AdjustedCapacity'] = resource.BaselineCapacity
+    
     new_portResource = PortResourceModel(**data)
     new_portResource.save()
 
@@ -40,6 +41,7 @@ class UpdatePortResourceInput(InputObjectType, PortResourceAttribute):
 
 class UpdatePortResource(Mutation):
   portResource = graphene.Field(lambda: PortResource)
+  ok = graphene.Boolean()
 
   class Arguments:
     input = UpdatePortResourceInput(required=True)
@@ -58,6 +60,7 @@ class DeletePortResourceInput(InputObjectType, PortResourceAttribute):
 
 class DeletePortResource(Mutation):
   portResource = graphene.Field(lambda: PortResource)
+  ok = graphene.Boolean()
 
   class Arguments:
     input = DeletePortResourceInput(required=True)

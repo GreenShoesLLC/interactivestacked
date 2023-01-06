@@ -59,7 +59,7 @@ class UpdateWorkspace(Mutation):
 
     db.session.commit()
 
-    return UpdateWorkspace(ok=True, workspace=uworkspace)
+    return UpdateWorkspace(workspace=uworkspace)
 
 class DeleteWorkspaceInput(InputObjectType, WorkspaceAttribute):
   Id = graphene.Int()
@@ -74,8 +74,7 @@ class DeleteWorkspace(Mutation):
     data = input_to_dictionary(input)
 
     dworkspace = db.session.query(WorkspaceModel).filter_by(Id=data['Id']).first()
-    db.session.delete(dworkspace)
-    db.session.commit()
+    dworkspace.remove()
 
     return DeleteWorkspace(workspace=dworkspace)
 
