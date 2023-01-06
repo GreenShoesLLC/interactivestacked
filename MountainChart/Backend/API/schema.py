@@ -5,6 +5,8 @@ from .mresource import MResource, CreateResource, UpdateResource, DeleteResource
 from .portfolio import Portfolio, CreatePortfolio, UpdatePortfolio, DeletePortfolio
 from .portfolioProject import PortProject, CreatePortProject, UpdatePortProject, DeletePortProject
 from .portfolioResource import PortResource, CreatePortResource, UpdatePortResource, DeletePortResource
+from .projectResource import ProResource, CreateProResource, UpdateProResource, DeleteProResource
+from .portfolioProRes import PortfolioProRes, CreatePortfolioProRes, UpdatePortfolioProRes, DeletePortfolioProRes
 
 import graphene
 
@@ -28,6 +30,12 @@ class Query(graphene.ObjectType):
 
   portResource = graphene.relay.Node.Field(PortResource)
   portResourceList = SQLAlchemyConnectionField(PortResource)
+
+  proResource = graphene.relay.Node.Field(ProResource)
+  proResourceList = SQLAlchemyConnectionField(ProResource)
+
+  portfolioProRes = graphene.relay.Node.Field(PortfolioProRes)
+  portfolioProResList = SQLAlchemyConnectionField(PortfolioProRes)
 
 
 class Mutation(graphene.ObjectType):
@@ -57,5 +65,12 @@ class Mutation(graphene.ObjectType):
   updatePortResource = UpdatePortResource.Field()
   deletePortResource = DeletePortResource.Field()
 
+  createProResource = CreateProResource.Field()
+  updateProResource = UpdateProResource.Field()
+  deleteProResource = DeleteProResource.Field()
+
+  createPortfolioProRes = CreatePortfolioProRes.Field()
+  updatePortfolioProRes = UpdatePortfolioProRes.Field()
+  deletePortfolioProRes = DeletePortfolioProRes.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

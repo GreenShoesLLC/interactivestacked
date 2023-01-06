@@ -75,7 +75,9 @@ class DeletePortProject(Mutation):
     data = input_to_dictionary(input)
 
     portProject = db.session.query(PortProjectModel).filter_by(Id=data['Id']).first()
-    portProject.remove()
+    
+    if portProject:
+      portProject.remove()
+      return DeletePortProject(ok=True)
 
-    return DeletePortProject(ok=True)
-
+    return DeletePortProject(ok=False)

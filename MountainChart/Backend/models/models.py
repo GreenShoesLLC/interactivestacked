@@ -34,7 +34,6 @@ class Workspace(db.Model, BaseModel):
   UpdatedAt = db.Column(db.DateTime, nullable=False, default=now, onupdate=now)
   SharedUsers = db.Column(db.Text, nullable=True)
 
-
 class Project(db.Model, BaseModel):
 
   __tablename__ = 'Project'
@@ -57,11 +56,10 @@ class Resource(db.Model, BaseModel):
 
   workspace = db.relationship('Workspace', backref='resources')
 
-class ProjectResource(db.Model):
+class ProjectResource(db.Model, BaseModel2):
 
   __tablename__ = 'ProjectResource'
 
-  Id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   ProjectId = db.Column(db.Integer, db.ForeignKey(Project.Id), nullable=False)
   ResourceId = db.Column(db.Integer, db.ForeignKey(Resource.Id), nullable=False)
   BaselineDemand = db.Column(db.Text, nullable=False)
@@ -97,6 +95,8 @@ class PortfolioProject(db.Model, BaseModel2):
   AdjustedStartDate = db.Column(db.DateTime, nullable=False)
   AdjustedPriority = db.Column(db.Integer, nullable=False)
 
+  portfolio = db.relationship('Portfolio', backref='PortProjects')
+
 class PortfolioResource(db.Model, BaseModel2):
 
   __tablename__ = 'PortfolioResource'
@@ -104,6 +104,8 @@ class PortfolioResource(db.Model, BaseModel2):
   PortfolioId = db.Column(db.String(40), db.ForeignKey(Portfolio.Id), nullable=False)
   ResourceId = db.Column(db.Integer, db.ForeignKey(Resource.Id), nullable=False)
   AdjustedCapacity = db.Column(db.Text)
+
+  Portfolio = db.relationship('Portfolio', backref='PortResources')
 
 class PortfolioProjectResource(db.Model, BaseModel2):
 
