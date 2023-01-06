@@ -49,13 +49,13 @@ class Mutation(graphene.ObjectType):
   updatePortfolio  = UpdatePortfolio .Field()
   deletePortfolio  = DeletePortfolio .Field()
 
-  createPortfolioProject = CreatePortProject.Field()
-  updatePortfolioProject = UpdatePortProject.Field()
-  deletePortfolioProject = DeletePortProject.Field()
+  createPortProject = CreatePortProject.Field()
+  updatePortProject = UpdatePortProject.Field()
+  deletePortProject = DeletePortProject.Field()
 
-  createPortfolioResource = CreatePortResource.Field()
-  updatePortfolioResource = UpdatePortResource.Field()
-  deletePortfolioResource = DeletePortResource.Field()
+  createPortResource = CreatePortResource.Field()
+  updatePortResource = UpdatePortResource.Field()
+  deletePortResource = DeletePortResource.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

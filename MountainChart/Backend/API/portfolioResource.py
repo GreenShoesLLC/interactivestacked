@@ -3,12 +3,11 @@ from .utils import input_to_dictionary
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from models import db, Resource as ResourceModel, PortfolioResource as PortResourceModel
 from graphene import relay, InputObjectType, Mutation
-from graphene.types.json import JSONString
 
 class PortResourceAttribute:
-  PortfolioId = graphene.Int()
+  PortfolioId = graphene.String()
   ResourceId = graphene.Int()
-  AdjustedCapacity = JSONString()
+  AdjustedCapacity = graphene.String()
 
 class PortResource(SQLAlchemyObjectType):
 
@@ -23,14 +22,14 @@ class CreatePortResource(Mutation):
   portResource = graphene.Field(lambda: PortResource)
 
   class Arguments:
-    input = CreatePortResourceInput(required=True)
+    input = CreatePortResourceInput(required=False)
   
   def mutate(self, info, input):
     data = input_to_dictionary(input)
 
     resource = db.session.query(ResourceModel).filter_by(Id=data['ResourceId']).first()
     data['AdjustedCapacity'] = resource.BaselineCapacity
-    
+
     new_portResource = PortResourceModel(**data)
     new_portResource.save()
 
@@ -50,7 +49,11 @@ class UpdatePortResource(Mutation):
     data = input_to_dictionary(input)
 
     portResource = db.session.query(PortResourceModel).filter_by(Id=data['Id']).first()
-    portResource.update(data)
+    
+    portResource.PortfolioId = data['PortfolioId']
+    portResource.ResourceId = data['ResourceId']
+    portResource.AdjustedCapacity = data['AdjustedCapacity']
+
     db.session.commit()
 
     return UpdatePortResource(ok=True, portResource=portResource)

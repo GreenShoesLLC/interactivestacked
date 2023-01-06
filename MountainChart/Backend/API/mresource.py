@@ -3,12 +3,12 @@ from .utils import input_to_dictionary
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from models import db, Resource as ResourceModel
 from graphene import relay, InputObjectType, Mutation
-from graphene.types.json import JSONString
 
 class MResourceAttribute:
   WorkspaceId = graphene.Int()
   Name = graphene.String()
-  BaselineCapacity = JSONString()
+  BaselineCapacity = graphene.String()
+  StartAt = graphene.Date()
   Tags = graphene.String()
 
 class MResource(SQLAlchemyObjectType):
@@ -53,6 +53,7 @@ class UpdateResource(Mutation):
     resource.WorkspaceId = data['WorkspaceId']
     resource.Name = data['Name']
     resource.BaselineCapacity = data['BaselineCapacity']
+    resource.StartAt = data['StartAt']
     resource.Tags = data['Tags']
 
     db.session.commit()

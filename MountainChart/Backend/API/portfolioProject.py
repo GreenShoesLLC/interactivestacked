@@ -5,7 +5,7 @@ from models import db, Project as ProjectModel, PortfolioProject as PortProjectM
 from graphene import relay, InputObjectType, Mutation
 
 class PortProjectAttribute:
-  PortfolioId = graphene.Int()
+  PortfolioId = graphene.String()
   ProjectId = graphene.Int()
   AdjustedStartDate = graphene.Date()
   AdjustedPriority = graphene.Int()
@@ -23,7 +23,7 @@ class CreatePortProject(Mutation):
   portProject = graphene.Field(lambda: PortProject)
 
   class Arguments:
-    input = CreatePortProjectInput(required=True)
+    input = CreatePortProjectInput(required=False)
   
   def mutate(self, info, input):
     data = input_to_dictionary(input)
@@ -35,7 +35,7 @@ class CreatePortProject(Mutation):
     new_portProject = PortProjectModel(**data)
     new_portProject.save()
 
-    return CreatePortProject(PortProject=new_portProject)
+    return CreatePortProject(portProject=new_portProject)
 
 class UpdatePortProjectInput(InputObjectType, PortProjectAttribute):
   Id = graphene.Int()
@@ -51,7 +51,12 @@ class UpdatePortProject(Mutation):
     data = input_to_dictionary(input)
 
     portProject = db.session.query(PortProjectModel).filter_by(Id=data['Id']).first()
-    portProject.update(data)
+    
+    portProject.PortfolioId = data['PortfolioId']
+    portProject.ProjectId = data['ProjectId']
+    portProject.AdjustedStartDate = data['AdjustedStartDate']
+    portProject.AdjustedPriority = data['AdjustedPriority']
+
     db.session.commit()
 
     return UpdatePortProject(ok=True, portProject=portProject)
@@ -70,8 +75,7 @@ class DeletePortProject(Mutation):
     data = input_to_dictionary(input)
 
     portProject = db.session.query(PortProjectModel).filter_by(Id=data['Id']).first()
-    db.session.delete(portProject)
-    db.session.commit()
+    portProject.remove()
 
     return DeletePortProject(ok=True)
 

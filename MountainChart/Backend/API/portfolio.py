@@ -10,7 +10,6 @@ class PortfolioAttribute:
   Name = graphene.String()
   StatusDate = graphene.Date()
   CreatedByUserId = graphene.Int()
-  LastModifiedByUserId = graphene.Int()
 
 class Portfolio(SQLAlchemyObjectType):
 
@@ -30,15 +29,16 @@ class CreatePortfolio(Mutation):
   def mutate(self, info, input):
     data = input_to_dictionary(input)
     data['Id'] = uuid.uuid4()
+    data['LastModifiedByUserId'] = data['CreatedByUserId']
 
     new_portfolio = PortfolioModel(**data)
     new_portfolio.save()
-    
 
-    return CreatePortfolio(Portfolio=new_portfolio)
+    return CreatePortfolio(portfolio=new_portfolio)
 
 class UpdatePortfolioInput(InputObjectType, PortfolioAttribute):
   Id = graphene.String()
+  LastModifiedByUserId = graphene.Int()
 
 class UpdatePortfolio(Mutation):
   portfolio = graphene.Field(lambda: Portfolio)

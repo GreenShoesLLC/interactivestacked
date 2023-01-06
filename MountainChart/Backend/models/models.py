@@ -1,4 +1,4 @@
-from models.base import BaseModel, db
+from models.base import BaseModel, BaseModel2, db
 
 from datetime import datetime
 
@@ -79,31 +79,36 @@ class Portfolio(db.Model):
   CreatedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
   LastModifiedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
 
-class PortfolioProject(db.Model):
+  def save(self):
+    db.session.add(self)
+    db.session.commit()
+
+  def remove(self):
+    db.session.delete(self)
+    db.session.commit()
+
+class PortfolioProject(db.Model, BaseModel2):
 
   __tablename__ = 'PortfolioProject'
 
-  Id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   PortfolioId = db.Column(db.String(40), db.ForeignKey(Portfolio.Id), nullable=False)
   ProjectId = db.Column(db.Integer, db.ForeignKey(Project.Id), nullable=False)
   IsSelected = db.Column(db.Boolean, default=0)
   AdjustedStartDate = db.Column(db.DateTime, nullable=False)
   AdjustedPriority = db.Column(db.Integer, nullable=False)
 
-class PortfolioResource(db.Model):
+class PortfolioResource(db.Model, BaseModel2):
 
   __tablename__ = 'PortfolioResource'
 
-  Id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   PortfolioId = db.Column(db.String(40), db.ForeignKey(Portfolio.Id), nullable=False)
   ResourceId = db.Column(db.Integer, db.ForeignKey(Resource.Id), nullable=False)
   AdjustedCapacity = db.Column(db.Text)
 
-class PortfolioProjectResource(db.Model):
+class PortfolioProjectResource(db.Model, BaseModel2):
 
   __tablename__ = 'PortfolioProjectResource'
 
-  Id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   PortfolioProjectId = db.Column(db.Integer, db.ForeignKey(PortfolioProject.Id), nullable=False)
   PortfolioResourceId = db.Column(db.Integer, db.ForeignKey(PortfolioResource.Id), nullable=False)
   AdjustDemand = db.Column(db.Text, nullable=False)
