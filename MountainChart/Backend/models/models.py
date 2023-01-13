@@ -39,8 +39,10 @@ class Project(db.Model, BaseModel):
   __tablename__ = 'Project'
 
   WorkspaceId = db.Column(db.Integer, db.ForeignKey(Workspace.Id), nullable=False)
-  BaselineStartDate = db.Column(db.DateTime, nullable=False)
+  BaselineStartDate = db.Column(db.Date, nullable=False)
   BaselinePriority = db.Column(db.Integer, default=100)
+  Color = db.Column(db.String(20), nullable=True)
+  StrokeColor = db.Column(db.String(20), nullable=True)
   Tags = db.Column(db.String(20), nullable=True)
 
   workspace = db.relationship('Workspace', backref='projects')
@@ -51,7 +53,7 @@ class Resource(db.Model, BaseModel):
 
   WorkspaceId = db.Column(db.Integer, db.ForeignKey(Workspace.Id), nullable=False)
   BaselineCapacity = db.Column(db.Text)
-  StartAt = db.Column(db.DateTime, nullable=False)
+  StartAt = db.Column(db.Date, nullable=False)
   Tags = db.Column(db.String(20), nullable=False)
 
   workspace = db.relationship('Workspace', backref='resources')
@@ -64,6 +66,9 @@ class ProjectResource(db.Model, BaseModel2):
   ResourceId = db.Column(db.Integer, db.ForeignKey(Resource.Id), nullable=False)
   BaselineDemand = db.Column(db.Text, nullable=False)
 
+  resource = db.relationship('Resource', backref='pro')
+  project = db.relationship('Project', backref='res')
+
 class Portfolio(db.Model):
 
   __tablename__ = 'Portfolio'
@@ -73,7 +78,7 @@ class Portfolio(db.Model):
   Id = db.Column(db.String(40), primary_key=True)
   Name = db.Column(db.String(30), nullable=False)
   WorkspaceId = db.Column(db.Integer, db.ForeignKey(Workspace.Id), nullable=False)
-  StatusDate = db.Column(db.DateTime, nullable=False, default=now)
+  StatusDate = db.Column(db.Date, nullable=False, default=now)
   CreatedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
   LastModifiedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
 
@@ -92,7 +97,7 @@ class PortfolioProject(db.Model, BaseModel2):
   PortfolioId = db.Column(db.String(40), db.ForeignKey(Portfolio.Id), nullable=False)
   ProjectId = db.Column(db.Integer, db.ForeignKey(Project.Id), nullable=False)
   IsSelected = db.Column(db.Boolean, default=0)
-  AdjustedStartDate = db.Column(db.DateTime, nullable=False)
+  AdjustedStartDate = db.Column(db.Date, nullable=False)
   AdjustedPriority = db.Column(db.Integer, nullable=False)
 
   portfolio = db.relationship('Portfolio', backref='PortProjects')

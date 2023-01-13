@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, createRef } from 'react';
+import moment from 'moment';
 
 const ChartBody = (props) => {
 
@@ -15,6 +16,7 @@ const ChartBody = (props) => {
   const [capacityData, setCapacityData] = useState([]);
   const [label, setLabel] = useState({});
   const [loading, setLoading] = useState(props.loading);
+  const [capindex, setCapIndex] = useState({});
 
   const dataRef = useRef([]);
   const markRef = useRef(null); 
@@ -25,16 +27,20 @@ const ChartBody = (props) => {
 
   const { chartId, stateChange } = props;
   let { AxisXMax, AxisXMin, AxisYMax, AxisYInterval } = props.datasource;
-  let oldX, oldY, moveUpDown, mouseDown, selectedID, selectedTag, selectedClass, method, state, lineDown, ctrlKey; 
+  let oldX, oldY, moveUpDown, mouseDown, selectedID, selectedIndex, selectedTag, selectedClass, method, state, lineDown, ctrlKey; 
   let timer;
 
   useEffect(() => {
-    const { demand, capacity, project, AxisXLabel, AxisYLabel } = props.datasource;
-    setDisplayData(demand);
-    setCapacityData(capacity);
-    setProjectData(project);
-    setLabel({X:AxisXLabel, Y:AxisYLabel});
-    setLoading(props.loading);
+    const { AxisXLabel, AxisYLabel, chartdata, filter } = props.datasource;
+    if(chartdata) {
+      const { cap, project, portfolio } = chartdata;
+      setDisplayData(portfolio[filter.resource]);
+      setCapacityData(cap[filter.resource]['BaselineCapacity']);
+      setCapIndex(cap[filter.resource]['Id']);
+      setProjectData(project);
+      setLabel({X:AxisXLabel, Y:AxisYLabel});
+      setLoading(props.loading);
+    }
   }, [props]);
   
   useEffect(()=> {
@@ -66,7 +72,7 @@ const ChartBody = (props) => {
           if(!dataRef.current[ startAt + index - 1]) { return false; }
           const box = dataRef.current[ startAt + index - 1];
           const node = document.createElement('span');
-          node.innerText = `${pro.name}(${item})`;
+          node.innerText = `${pro.name}(${Math.round(item)})`;
           node.id = `${chartId}-${i}-${index}`;
           node.className = 'con';
           node.style.cssText = 
@@ -159,25 +165,39 @@ const ChartBody = (props) => {
     }
 
     return x.map((item, index) => (
-      <div className='xAxis' key = {index} ref={xAxisRef.current[index]}>
-        <div id='mark' style={{background: index%10 === 0 ? 'white' : 'rgb(217, 217, 217)'}} ref = {markRef}>
+      <div className='xAxis' key = {index} ref = {xAxisRef.current[index]}>
+        <div id='mark' style = {{background: index%10 === 0 ? 'white' : 'rgb(217, 217, 217)'}} ref = {markRef}>
           { index%10 === 0 ? item.year : index%10 + 1 }
         </div>
-        <div className = 'data' id={'t' + index} ref={dataRef.current[index]}>
+        <div className = 'data' id={'t' + index} ref = {dataRef.current[index]}>
         </div>
       </div>
     ));
   };
 
   const onDemandChange = () => {
-    if(stateChange){
-      stateChange({state: 'demand', data: displayData});
+    if(stateChange) {
+      if(method === 1) {
+        stateChange({state: 'resize', newData: displayData[selectedIndex]});
+      } 
+      if(method === 0) {
+        let tmpData = [];
+        Object.keys(projectData).map((key) => {
+          let { Id, priority, start } = projectData[key];
+          tmpData.push({
+            Id: Id,
+            BaselinePriority: priority,
+            BaselineStartDate: moment(`${start}.01`).format('Y-MM-DD')
+          });
+        });
+        stateChange({state: 'drag', newData: tmpData});
+      }
     }
   }
 
   const onCapacityChange = () => {
-    if(stateChange){
-      stateChange({state: 'capacity', data: capacityData});
+    if(stateChange) {
+      stateChange({state: 'capacity', newData: {data: capacityData, index: capindex}});
     }
   }
 
@@ -323,6 +343,7 @@ const ChartBody = (props) => {
       let element = document.getElementById(selectedID);
       clearTimeout(timer);
       let [i, j] = selectedID.split('-').slice(1); 
+      selectedIndex = i;
       timer = setTimeout(() => {
         let step = oldY-e.pageY;
         let height =  displayData[i].data[j] + step/unit.itemHeightUnit;
@@ -373,7 +394,7 @@ const ChartBody = (props) => {
         mouseDown = false;
         if(selectedTag === 'SPAN'){
           changeInnerText();
-          onDemandChange();
+          onDemandChange(method);
         }
         method = null;
         if(lineDown) {

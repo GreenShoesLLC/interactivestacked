@@ -1,6 +1,6 @@
 from graphene_sqlalchemy import SQLAlchemyConnectionField
 from .workspace import Workspace, CreateWorkspace, UpdateWorkspace, DeleteWorkspace
-from .project import Project, CreateProject, UpdateProject, DeleteProject
+from .project import Project, CreateProject, UpdateProject, UpdateMultiProject, DeleteProject
 from .mresource import MResource, CreateResource, UpdateResource, DeleteResource
 from .portfolio import Portfolio, CreatePortfolio, UpdatePortfolio, DeletePortfolio
 from .portfolioProject import PortProject, CreatePortProject, UpdatePortProject, DeletePortProject
@@ -47,6 +47,7 @@ class Mutation(graphene.ObjectType):
 
   createProject = CreateProject.Field()
   updateProject = UpdateProject.Field()
+  updateMultiProject = UpdateMultiProject.Field()
   deleteProject = DeleteProject.Field()
 
   createResource = CreateResource.Field()

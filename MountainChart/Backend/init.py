@@ -13,7 +13,7 @@ def create_app(test_config=None):
 
 	app.config.from_object(Config)
 
-	cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+	cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 	# initializing routes
 	app.add_url_rule(

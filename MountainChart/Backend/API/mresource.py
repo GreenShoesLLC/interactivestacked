@@ -43,18 +43,23 @@ class UpdateResource(Mutation):
 
 
   class Arguments:
-    input = UpdateResourceInput(required=True)
+    input = UpdateResourceInput(required=False)
 
   def mutate(self, info, input):
     data = input_to_dictionary(input)
 
     resource = db.session.query(ResourceModel).filter_by(Id=data['Id']).first()
     
-    resource.WorkspaceId = data['WorkspaceId']
-    resource.Name = data['Name']
-    resource.BaselineCapacity = data['BaselineCapacity']
-    resource.StartAt = data['StartAt']
-    resource.Tags = data['Tags']
+    if 'WorkspaceId' in data:
+      resource.WorkspaceId = data['WorkspaceId']
+    if 'Name' in data:
+      resource.Name = data['Name']
+    if 'BaselineCapacity' in data:
+      resource.BaselineCapacity = data['BaselineCapacity']
+    if 'StartAt' in data:
+      resource.StartAt = data['StartAt']
+    if 'Tags' in data:
+      resource.Tags = data['Tags']
 
     db.session.commit()
 

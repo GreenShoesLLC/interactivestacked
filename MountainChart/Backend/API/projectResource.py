@@ -47,6 +47,8 @@ class UpdateProResource(Mutation):
 
     uproResource = db.session.query(ProResourceModel).filter_by(ProjectId = data['ProjectId'], ResourceId = data['ResourceId']).first()
 
+    if 'Name' in data:
+      uproResource.Name = data['Name']
     uproResource.BaselineDemand = data['BaselineDemand']
 
     db.session.commit()

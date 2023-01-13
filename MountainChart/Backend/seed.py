@@ -42,13 +42,13 @@ with app.app_context():
   workspace.save()
 
   # Add 3 Resources to that Workspace
-  Resources = ['Developers', 'QA', 'Business Analyist']
+  Resources = ['Developers', 'QA', 'Business Analyst']
   dev = []
   BaselineCapacity = []
   for i in range(3):
     y = []
     for j in range(24):
-      y.append(random.randrange(5, 30))
+      y.append(random.randrange(10, 15))
     BaselineCapacity.append(y)
     dev.append(
       Resource(
@@ -65,18 +65,64 @@ with app.app_context():
   print('Resources Created!')
 
   # Add 10 Projects to that Workspace
-  BaselineStartDate = ['2023-01-01', '2023-02-01', '2023-03-01', '2023-04-01', '2023-05-01', '2023-06-01', '2023-07-01', '2023-08-01', '2023-09-01', '2023-10-01']
+  BaselineStartDate = ['2023-01-01', '2024-03-01', '2023-05-01', '2023-07-01', '2023-09-01', '2024-11-01', '2024-01-01', '2024-04-01', '2024-06-01', '2024-08-01']
   Name = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+  Color = [{
+      "strokecolor": "#990000",
+      "color": "#ff3333"
+    },
+    {
+      "strokecolor": "#009900",
+      "color": "#33ff33"
+    },
+    {
+      "strokecolor": "#006699",
+      "color": "#33bbff"
+    },
+    {
+      "strokecolor": "#999900",
+      "color": "#ffff33",
+      "prority": "3",
+      "start": "2022.7"
+    },
+    {
+      "strokecolor": "#3d5c5c",
+      "color": "#85adad",
+      "prority": "3",
+      "start": "2022.9"
+    },
+    {
+      "strokecolor": "#990099",
+      "color": "#cc00cc"
+    },
+    {
+      "strokecolor": "#669900",
+      "color": "#bbff33"
+    },
+    {
+      "strokecolor": "#990073",
+      "color": "#ff33cc"
+    },
+    {
+      "strokecolor": "#004d99",
+      "color": "#3399ff"
+    },
+    {
+      "strokecolor": "#262673",
+      "color": "#6666cc"
+    }]
   Projects = []
   Priority = []
   for i in range(10):
-    Priority.append(random.randrange(1, 30))
+    Priority.append(random.randrange(1, 6))
     Projects.append(
       Project(
         WorkspaceId = 1,
         Name = Name[i],
         BaselineStartDate = datetime.strptime(BaselineStartDate[i], '%Y-%m-%d').date(),
-        BaselinePriority = Priority[i]
+        BaselinePriority = Priority[i],
+        Color = Color[i]['color'],
+        StrokeColor = Color[i]['strokecolor']
       )
     )
 
@@ -89,7 +135,7 @@ with app.app_context():
     for j in range(3):
       x = []
       for y in range(15):
-        x.append(random.randrange(2, 15))
+        x.append(random.randrange(1, 6))
       BaselineDemand.append(x)
       ProjectResources.append(
         ProjectResource(

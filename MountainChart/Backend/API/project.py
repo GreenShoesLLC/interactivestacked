@@ -9,6 +9,8 @@ class ProjectAttribute:
   Name = graphene.String()
   BaselineStartDate = graphene.Date()
   BaselinePriority = graphene.Int()
+  Color = graphene.String()
+  StrokeColor = graphene.String()
   Tags = graphene.String()
 
 class Project(SQLAlchemyObjectType):
@@ -42,22 +44,49 @@ class UpdateProject(Mutation):
   ok = graphene.Boolean()
 
   class Arguments:
-    input = UpdateProjectInput(required=True)
+    input = UpdateProjectInput(required=False)
 
   def mutate(self, info, input):
     data = input_to_dictionary(input)
 
     uproject = db.session.query(ProjectModel).filter_by(Id=data['Id']).first()
     
-    uproject.Name = data['Name']
-    uproject.WorkspaceId = data['WorkspaceId']
-    uproject.BaselineStartDate = data['BaselineStartDate']
-    uproject.BaselinePriority = data['BaselinePriority']
-    uproject.Tags = data['Tags']
+    if 'Name' in data:
+      uproject.Name = data['Name']
+    if 'WorkspaceId' in data:
+      uproject.WorkspaceId = data['WorkspaceId']
+    if 'BaselineStartDate' in data:
+      uproject.BaselineStartDate = data['BaselineStartDate']
+    if 'BaselinePriority' in data:
+      uproject.BaselinePriority = data['BaselinePriority']
+    if 'Tags' in data:
+      uproject.Tags = data['Tags']
 
     db.session.commit()
 
     return UpdateProject(ok=True, project=uproject)
+
+class UpdateMultiProjectInput(InputObjectType):
+  ProjectList = graphene.List(UpdateProjectInput)
+
+class UpdateMultiProject(Mutation):
+  ok = graphene.Boolean()
+
+  class Arguments:
+    input = UpdateMultiProjectInput(required=False)
+
+  def mutate(self, info, input):
+    data = input_to_dictionary(input)
+
+    for item in data['ProjectList']:
+      uproject = db.session.query(ProjectModel).filter_by(Id=item['Id']).first()
+      
+      uproject.BaselineStartDate = item['BaselineStartDate']
+      uproject.BaselinePriority = item['BaselinePriority']
+
+      db.session.commit()
+
+    return UpdateProject(ok=True) 
 
 class DeleteProjectInput(InputObjectType, ProjectAttribute):
   Id = graphene.Int()

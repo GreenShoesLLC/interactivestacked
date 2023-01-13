@@ -1,40 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useMutation } from '@apollo/client';
 
 import MountainChart from 'component/chart/MountainChart';
+import { getDataByWorkspaceId } from 'store/actions/queries/workspace';
 
-import { getPortfolio, getCapacity } from 'store/actions/resourceAction';
+import { UPDATE_CAPACITY_BY_DRAG } from 'store/actions/mutations/resource';
+import { UPDATE_PRORES_BY_RESIZE } from 'store/actions/mutations/projectReource';
+import { UPDATE_PROJECT_BY_DRAG } from 'store/actions/mutations/project';
 
 const Main = () => {
 
-  const [portfolioData, setPortfolioData] = useState([]);
-  const [resourceData, setResourceData] = useState([]);
-  const [projectData, setProjectData] = useState([]);
-  const [loading, setLoading] = useState(false);
-
   const [filter, setFilter] = useState({
-    resource: 'Dev',
+    resource: 'Developers',
     portfolio: 'Portfolio1'
   });
+  
+  const data = getDataByWorkspaceId('V29ya3NwYWNlOjE=');
+
+  const [updateRes] = useMutation(UPDATE_CAPACITY_BY_DRAG);
+  const [updateDemand] = useMutation(UPDATE_PRORES_BY_RESIZE);
+  const [updateProject] = useMutation(UPDATE_PROJECT_BY_DRAG);
 
   const chartRef = useRef(null), portRef = useRef(null), resRef = useRef(null);
   const resourceType = {
-    'Developer':'Dev',
+    'Developers':'Developers',
     'QA':'QA',
-    'Business Analyst': 'BA'
+    'Business Analyst': 'Business Analyst'
   };
 
   const portfolioType = ['Portfolio1', 'Portfolio2'];
-
-  useEffect(() => {
-    setLoading(true);
-    Promise.all([getPortfolio(filter.portfolio), getCapacity(filter)]).then(res => {
-      const [port, cap] = res;
-      setPortfolioData(port.tmpDemand[filter.resource]);
-      setProjectData(port.tmpProject);
-      setResourceData(cap);
-      setLoading(false);
-    });
-  }, [filter]);
 
   const handleMethod = () => {
     setFilter({
@@ -44,14 +38,22 @@ const Main = () => {
   }
 
   const onSourceChange = (change) => {
-    const {state, data} = change;
+    const {state, newData} = change;
     switch(state){
-      case 'demand':
-        setPortfolioData(data);
+      case 'resize': {
+        let { pId, rId, data } = newData;
+        updateDemand({variables: {pId, rId, Demand: data}});
         break;
-      case 'capacity':
-        setResourceData(data);
+      }
+      case 'drag': {
+        updateProject({variables: {ProjectList: newData}});
         break;
+      }
+      case 'capacity': {
+        let { data, index } = newData;
+        updateRes({variables: {Id: index, capacity:`[${data.toString()}]`}});
+        break;
+      }
       default:
         break;
     }
@@ -95,23 +97,19 @@ const Main = () => {
       <Selector />
       <MountainChart  
         title = {'MountainChart-1'}
-        demand = {portfolioData}
-        capacity = {resourceData}
-        project = {projectData}
+        chartdata = {data}
         AxisXMin = {2022}
         AxisXMax = {2026}
         AxisXLabel = {'Time'}
         AxisYLabel = {'people'}
+        AxisYMax = {35}
         AxisYInterval = {5}
         stateChange = { onSourceChange }
         filter = { filter }
-        loading = {loading}
         />
       <MountainChart  
         title = {'MountainChart-2'}
-        demand = {portfolioData}
-        capacity = {resourceData}
-        project = {projectData}
+        chartdata = {data}
         AxisXMin = {2023}
         AxisXMax = {2026}
         AxisXLabel = {'year/month'}
@@ -119,7 +117,6 @@ const Main = () => {
         AxisYInterval = {5}
         stateChange = { onSourceChange }
         filter = { filter }
-        loading = {loading}
         />
     </>
   )
