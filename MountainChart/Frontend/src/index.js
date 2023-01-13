@@ -14,7 +14,7 @@ import * as serviceWorker from './serviceWorker';
 
 const client = new ApolloClient({
   uri: `${process.env.REACT_APP_PROXY}/access`,
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache()
 });
 
 const root = createRoot(document.getElementById('root'));

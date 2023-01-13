@@ -293,15 +293,23 @@ const ChartBody = (props) => {
               `background:${color};border: 1px solid ${strokecolor};
               border-top: 1px solid ${strokecolor};height:${item*unit.itemHeightUnit}px`;
           }
-          if(!dataRef.current[start + index + step - 1]) continue;
+          if(!dataRef.current[start + index + step - 1]) {
+            select.remove();
+            continue;
+          }
           let embed = dataRef.current[start + index + step - 1].current;
           embed.insertBefore(select, embed.children[0]);
         }
         state = false;
 
-        const y = Math.floor( (start + step)/10 ) + AxisXMin
+        const y = Math.floor( (start + step)/10 ) + AxisXMin;
         const m = (start + step) % 10 === 0 ? 10 : (start + step) % 10;
-        projectData[displayData[i].name].start = `${y}.${m}`;
+        if(m < 0) {
+          projectData[displayData[i].name].start = `${y}.${10+m}`;
+        }
+        else {
+          projectData[displayData[i].name].start = `${y}.${m}`;
+        }
       }
       else {
         if( moveUpDown && (e.pageY > oldY) ) {

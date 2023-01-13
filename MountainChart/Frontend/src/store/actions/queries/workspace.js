@@ -1,11 +1,12 @@
 import { useQuery, gql } from '@apollo/client';
 import moment from 'moment';
 
+let i = true;
 export const getWorkspaceList = () => {
 
 }
 
-export const getDataByWorkspaceId = (workspaceId, resType) => {
+export const getDataByWorkspaceId = (workspaceId) => {
   const GET_DATA = gql`query {
     workspace(id: "${workspaceId}"){
       projects{
@@ -45,8 +46,10 @@ export const getDataByWorkspaceId = (workspaceId, resType) => {
     }
   }`;
 
-  const { loading, error, data } = useQuery(GET_DATA);
-
+  const { loading, error, data, refetch } = useQuery(GET_DATA);
+  refetch(GET_DATA);
+  
+  i = false;
   if(error) return error;
 
   if(data) {

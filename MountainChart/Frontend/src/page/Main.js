@@ -51,7 +51,7 @@ const Main = () => {
       }
       case 'capacity': {
         let { data, index } = newData;
-        updateRes({variables: {Id: index, capacity:`[${data.toString()}]`}});
+        updateRes({variables: {Id: index, capacity: `[${data.toString()}]`}});
         break;
       }
       default:
