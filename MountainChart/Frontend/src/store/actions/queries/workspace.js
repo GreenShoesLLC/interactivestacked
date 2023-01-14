@@ -1,11 +1,6 @@
 import { useQuery, gql } from '@apollo/client';
 import moment from 'moment';
 
-let i = true;
-export const getWorkspaceList = () => {
-
-}
-
 export const getDataByWorkspaceId = (workspaceId) => {
   const GET_DATA = gql`query {
     workspace(id: "${workspaceId}"){
@@ -46,10 +41,11 @@ export const getDataByWorkspaceId = (workspaceId) => {
     }
   }`;
 
-  const { loading, error, data, refetch } = useQuery(GET_DATA);
-  refetch(GET_DATA);
+  const { loading, error, data, refetch } = useQuery(GET_DATA, {
+    fetchPolicy: 'no-cache',
+  });
+  //refetch(GET_DATA);
   
-  i = false;
   if(error) return error;
 
   if(data) {
@@ -81,7 +77,7 @@ export const getDataByWorkspaceId = (workspaceId) => {
       let { Id, Color, StrokeColor, Name, BaselineStartDate, BaselinePriority } = row.node;
       project[Name] = {
         Id,
-        start: moment(BaselineStartDate).format('Y.M'),
+        start: moment(BaselineStartDate).format('YYYY.MM'),
         priority: BaselinePriority,
         color: Color,
         strokecolor: StrokeColor,

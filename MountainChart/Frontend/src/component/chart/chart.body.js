@@ -65,7 +65,7 @@ const ChartBody = (props) => {
   const draw = () => {
     if(displayData) {
       displayData.map((pro, i) => {
-        const { start, strokecolor, color } = projectData[pro.name];
+        const { start, strokecolor, color, priority } = projectData[pro.name];
         const [year, month] = start.split('.');
         const startAt = (parseInt(year) - AxisXMin) * 10 + parseInt(month);
         pro.data.map((item, index) => {
@@ -78,7 +78,23 @@ const ChartBody = (props) => {
           node.style.cssText = 
             `background:${color};border: 1px solid ${strokecolor};
             border-top: 1px solid ${strokecolor};height:${item*unit.itemHeightUnit}px`;
-          box.current.appendChild(node);
+          
+          const children = box.current.children;
+
+          let s = true;
+          for(let j = 0; j < children.length; j++) {
+            const index = children[j].id.split('-')[1];
+            let slibingPriority = projectData[displayData[index].name].priority;
+            if(priority <= slibingPriority) {
+              box.current.insertBefore(node, children[j]);
+              s = false;
+              break;
+            }
+          }
+          if(s) {
+            box.current.appendChild(node);
+          }
+
           return true;
         })
         return true;
@@ -187,7 +203,7 @@ const ChartBody = (props) => {
           tmpData.push({
             Id: Id,
             BaselinePriority: priority,
-            BaselineStartDate: moment(`${start}.01`).format('Y-MM-DD')
+            BaselineStartDate: moment(new Date(start)).format('YYYY-MM-DD')
           });
         });
         stateChange({state: 'drag', newData: tmpData});
@@ -310,6 +326,7 @@ const ChartBody = (props) => {
         else {
           projectData[displayData[i].name].start = `${y}.${m}`;
         }
+        projectData[displayData[i].name].priority = 1;
       }
       else {
         if( moveUpDown && (e.pageY > oldY) ) {
@@ -320,6 +337,11 @@ const ChartBody = (props) => {
             if(!select) continue;
             let embed = select.parentNode;
             if(select.nextSibling) {
+              let tmp = projectData[displayData[i].name].priority;
+              const index = select.nextSibling.id.split('-')[1];
+              projectData[displayData[i].name].priority = projectData[displayData[index].name].priority;
+              projectData[displayData[index].name].priority = tmp;
+
               embed.insertBefore(select.nextSibling, select);
             }
           }    
@@ -331,9 +353,13 @@ const ChartBody = (props) => {
             if(!select) continue;
             let embed = select.parentNode;
             if(select.previousSibling) {
+              let tmp = projectData[displayData[i].name].priority;
+              const index = select.previousSibling.id.split('-')[1];
+              projectData[displayData[i].name].priority = projectData[displayData[index].name].priority;
+              projectData[displayData[index].name].priority = tmp;
+
               embed.insertBefore(select, select.previousSibling);
             }
-              
           } 
         }  
         oldY = e.pageY;
