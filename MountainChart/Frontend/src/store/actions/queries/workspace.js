@@ -44,7 +44,7 @@ export const getDataByWorkspaceId = (workspaceId) => {
   const { loading, error, data, refetch } = useQuery(GET_DATA, {
     fetchPolicy: 'no-cache',
   });
-  //refetch(GET_DATA);
+  refetch(GET_DATA);
   
   if(error) return error;
 
@@ -58,7 +58,7 @@ export const getDataByWorkspaceId = (workspaceId) => {
       cap[Name] = {
         Id,
         BaselineCapacity: JSON.parse(BaselineCapacity),
-        StartAt
+        startAt: moment(StartAt).format('YYYY.MM')
       }
 
       portfolio[Name] = [];

@@ -17,6 +17,7 @@ const ChartBody = (props) => {
   const [label, setLabel] = useState({});
   const [loading, setLoading] = useState(props.loading);
   const [capindex, setCapIndex] = useState({});
+  const [capStartAt, setCapStartAt] = useState('');
 
   const dataRef = useRef([]);
   const markRef = useRef(null); 
@@ -36,6 +37,7 @@ const ChartBody = (props) => {
       const { cap, project, portfolio } = chartdata;
       setDisplayData(portfolio[filter.resource]);
       setCapacityData(cap[filter.resource]['BaselineCapacity']);
+      setCapStartAt(cap[filter.resource]['startAt']);
       setCapIndex(cap[filter.resource]['Id']);
       setProjectData(project);
       setLabel({X:AxisXLabel, Y:AxisYLabel});
@@ -104,9 +106,12 @@ const ChartBody = (props) => {
   
   const drawCapacityLine = () => {
     if(capacityData) {
+      const [year, month] = capStartAt.split('.');
+      const startAt = (parseInt(year) - AxisXMin) * 10 + parseInt(month);
+      
       capacityData.map((item, i) => {
-        if(!dataRef.current[i]) { return false; }
-        const box = dataRef.current[i];
+        if(!dataRef.current[startAt + i - 1]) { return false; }
+        const box = dataRef.current[startAt + i - 1];
         const node = document.createElement('div');
         node.classList.add('capacityLine');
         node.id = `${chartId}-${i}`;
