@@ -101,7 +101,7 @@ const Main = () => {
         AxisXMin = {2022}
         AxisXMax = {2026}
         AxisXLabel = {'Time'}
-        AxisYLabel = {'people'}
+        AxisYLabel = {filter.resource}
         AxisYMax = {35}
         AxisYInterval = {5}
         stateChange = { onSourceChange }
