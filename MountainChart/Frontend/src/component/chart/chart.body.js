@@ -87,7 +87,7 @@ const ChartBody = (props) => {
           for(let j = 0; j < children.length; j++) {
             const index = children[j].id.split('-')[1];
             let slibingPriority = projectData[displayData[index].name].priority;
-            if(priority <= slibingPriority) {
+            if(priority < slibingPriority) {
               box.current.insertBefore(node, children[j]);
               s = false;
               break;
@@ -318,8 +318,23 @@ const ChartBody = (props) => {
             select.remove();
             continue;
           }
+
           let embed = dataRef.current[start + index + step - 1].current;
-          embed.insertBefore(select, embed.children[0]);
+          let childCount = embed.children.length;
+          let s = true;
+          for(let j = 0; j < childCount; j++) {
+            const num = embed.children[j].id.split('-')[1];
+            if(embed.children[j].tagName === 'SPAN' && displayData[i].name !== displayData[num]) {
+              if(projectData[displayData[i].name].priority < projectData[displayData[num].name].priority) {
+                embed.insertBefore(select, embed.children[j]);
+                s = false;
+                break;
+              }
+            }
+          }
+          if(s) {
+            embed.appendChild(select);
+          }
         }
         state = false;
 
@@ -331,21 +346,19 @@ const ChartBody = (props) => {
         else {
           projectData[displayData[i].name].start = `${y}.${m}`;
         }
-        projectData[displayData[i].name].priority = 1;
       }
       else {
         if( moveUpDown && (e.pageY > oldY) ) {
           for(let index = 0 ; index < length ; index++) {
             const id  = `${chartId}-${parseInt(i)}-${index}`;
             let select = document.getElementById(id);
-
             if(!select) continue;
             let embed = select.parentNode;
-            if(select.nextSibling) {
+            if(select.nextSibling && select.nextSibling.tagName === 'SPAN') {
               let tmp = projectData[displayData[i].name].priority;
-              const index = select.nextSibling.id.split('-')[1];
-              projectData[displayData[i].name].priority = projectData[displayData[index].name].priority;
-              projectData[displayData[index].name].priority = tmp;
+              const num = select.nextSibling.id.split('-')[1];
+              projectData[displayData[i].name].priority = projectData[displayData[num].name].priority;
+              projectData[displayData[num].name].priority = tmp;
 
               embed.insertBefore(select.nextSibling, select);
             }
@@ -357,7 +370,7 @@ const ChartBody = (props) => {
             let select = document.getElementById(id);
             if(!select) continue;
             let embed = select.parentNode;
-            if(select.previousSibling) {
+            if(select.previousSibling && select.previousSibling.tagName === 'SPAN') {
               let tmp = projectData[displayData[i].name].priority;
               const index = select.previousSibling.id.split('-')[1];
               projectData[displayData[i].name].priority = projectData[displayData[index].name].priority;
