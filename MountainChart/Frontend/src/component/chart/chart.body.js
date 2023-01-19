@@ -349,36 +349,74 @@ const ChartBody = (props) => {
       }
       else {
         if( moveUpDown && (e.pageY > oldY) ) {
-          for(let index = 0 ; index < length ; index++) {
+          let start = 0, count = 0, priority = 1000000, project = null;
+          for(let index = 0; index < length; index++) {
+            const id  = `${chartId}-${parseInt(i)}-${index}`;
+            let select = document.getElementById(id);
+            if(!select) continue;
+            if(select.nextSibling && select.nextSibling.tagName === 'SPAN') {
+              const num = select.nextSibling.id.split('-')[1];
+              if(priority > projectData[displayData[num].name].priority) {
+                priority = projectData[displayData[num].name].priority;
+                start = index;
+                count = 0;
+                project = displayData[num].name;
+              }
+              if(priority === projectData[displayData[num].name].priority) {
+                count++;
+              }
+            }
+          }
+
+          if(!project) return;
+          let tmp = projectData[displayData[i].name].priority;
+          projectData[displayData[i].name].priority = priority;
+          projectData[project].priority = tmp;
+
+          for(let index = start; index < start + count; index++) {
             const id  = `${chartId}-${parseInt(i)}-${index}`;
             let select = document.getElementById(id);
             if(!select) continue;
             let embed = select.parentNode;
             if(select.nextSibling && select.nextSibling.tagName === 'SPAN') {
-              let tmp = projectData[displayData[i].name].priority;
-              const num = select.nextSibling.id.split('-')[1];
-              projectData[displayData[i].name].priority = projectData[displayData[num].name].priority;
-              projectData[displayData[num].name].priority = tmp;
-
               embed.insertBefore(select.nextSibling, select);
             }
-          }    
+          } 
         }
         if( moveUpDown && (e.pageY < oldY) ) {
+          let start = 0, count = 0, priority = 0, project = null;
           for(let index = 0; index < length; index++) {
+            const id  = `${chartId}-${parseInt(i)}-${index}`;
+            let select = document.getElementById(id);
+            if(!select) continue;
+            if(select.previousSibling && select.previousSibling.tagName === 'SPAN') {
+              const num = select.previousSibling.id.split('-')[1];
+              if(priority < projectData[displayData[num].name].priority) {
+                priority = projectData[displayData[num].name].priority;
+                start = index;
+                count = 0;
+                project = displayData[num].name;
+              }
+              if(priority === projectData[displayData[num].name].priority) {
+                count++;
+              }
+            }
+          }
+
+          if(!project) return;
+          let tmp = projectData[displayData[i].name].priority;
+          projectData[displayData[i].name].priority = priority;
+          projectData[project].priority = tmp;
+
+          for(let index = start; index < start + count; index++) {
             const id  = `${chartId}-${parseInt(i)}-${index}`;
             let select = document.getElementById(id);
             if(!select) continue;
             let embed = select.parentNode;
             if(select.previousSibling && select.previousSibling.tagName === 'SPAN') {
-              let tmp = projectData[displayData[i].name].priority;
-              const index = select.previousSibling.id.split('-')[1];
-              projectData[displayData[i].name].priority = projectData[displayData[index].name].priority;
-              projectData[displayData[index].name].priority = tmp;
-
               embed.insertBefore(select, select.previousSibling);
             }
-          } 
+          }
         }  
         oldY = e.pageY;
         moveUpDown = false;
