@@ -32,28 +32,61 @@ with app.app_context():
 
   # Add a new Workspace to the Tenant
 
-  workspace = Workspace(
-    TenantId = 1,
-    Name = 'team',
-    StatusDate = datetime.strptime('2025-05-01', '%Y-%m-%d').date(),
-    Description = 'chart to manage team member',
-    CreatedByUserId = 1
-  )
-  workspace.save()
+  workspacelist = [
+    {
+      'TenantId': 1,
+      'Name':  'workspace1',
+      'StatusDate': '2025-05-01',
+      'Description': 'chart1',
+      'CreatedByUserId': 1
+    },
+    {
+      'TenantId': 1,
+      'Name':  'workspace2',
+      'StatusDate': '2025-03-01',
+      'Description': 'chart2',
+      'CreatedByUserId': 1
+    },
+    {
+      'TenantId': 1,
+      'Name':  'workspace3',
+      'StatusDate': '2025-04-01',
+      'Description': 'chart3',
+      'CreatedByUserId': 1
+    }
+  ]
+  work = []
+  for i in range(3):
+    work.append(
+      Workspace(
+        TenantId = workspacelist[i]['TenantId'],
+        Name = workspacelist[i]['Name'],
+        StatusDate = datetime.strptime(workspacelist[i]['StatusDate'], '%Y-%m-%d').date(),
+        Description = workspacelist[i]['Description'],
+        CreatedByUserId = workspacelist[i]['CreatedByUserId']
+      )
+    )
+  db.session.add_all(work)
+  db.session.commit()
 
   # Add 3 Resources to that Workspace
-  Resources = ['Developers', 'QA', 'Business Analyst']
+  Resources = ['Developers', 'QA', 'Business Analyst', 'Designer']
   dev = []
   BaselineCapacity = []
-  for i in range(3):
+  for i in range(14):
+    x = 1
+    if i >= 1 and i <= 3:
+      x = 2
+    if i >= 4:
+      x = 3
     y = []
     for j in range(24):
       y.append(random.randrange(10, 15))
     BaselineCapacity.append(y)
     dev.append(
       Resource(
-        WorkspaceId = 1,
-        Name = Resources[i],
+        WorkspaceId = x,
+        Name = Resources[i%4] + str(i),
         BaselineCapacity = json.dumps(BaselineCapacity[i]),
         StartAt = datetime.strptime('2023-01-01', '%Y-%m-%d').date(),
         Tags = ''
@@ -65,7 +98,7 @@ with app.app_context():
   print('Resources Created!')
 
   # Add 10 Projects to that Workspace
-  BaselineStartDate = ['2023-01-01', '2024-03-01', '2023-05-01', '2023-07-01', '2023-09-01', '2024-11-01', '2024-01-01', '2024-04-01', '2024-06-01', '2024-08-01']
+  BaselineStartDate = ['2023-01-01', '2024-03-01', '2023-05-01', '2023-07-01', '2023-09-01', '2024-11-01', '2024-01-01', '2024-04-01', '2024-06-01', '2024-08-01', '2024-10-01', '2025-01-01', '2025-02-01', '2025-03-01', '2025-04-01']
   Name = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
   Color = [{
       "strokecolor": "#990000",
@@ -112,17 +145,20 @@ with app.app_context():
       "color": "#6666cc"
     }]
   Projects = []
-  Priority = []
-  for i in range(10):
-    Priority.append(random.randrange(1, 6))
+  for i in range(130):
+    x = 1
+    if i>=10 and i<= 29:
+      x = 2
+    if i>=30:
+      x = 3
     Projects.append(
       Project(
-        WorkspaceId = 1,
-        Name = Name[i],
-        BaselineStartDate = datetime.strptime(BaselineStartDate[i], '%Y-%m-%d').date(),
-        BaselinePriority = Priority[i],
-        Color = Color[i]['color'],
-        StrokeColor = Color[i]['strokecolor']
+        WorkspaceId = x,
+        Name = Name[i%10] + str(i),
+        BaselineStartDate = datetime.strptime(BaselineStartDate[i%15], '%Y-%m-%d').date(),
+        BaselinePriority = i,
+        Color = Color[i%10]['color'],
+        StrokeColor = Color[i%10]['strokecolor']
       )
     )
 
@@ -131,8 +167,16 @@ with app.app_context():
 
   ProjectResources = []
   BaselineDemand = []
-  for i in range(10):
-    for j in range(3):
+  for i in range(130):
+    s = 1
+    t = 2
+    if i >= 10 and i <= 29:
+      s = 2
+      t = 5
+    if i >= 30:
+      s = 5
+      t = 15
+    for j in range(s, t):
       x = []
       for y in range(15):
         x.append(random.randrange(1, 6))
@@ -140,8 +184,8 @@ with app.app_context():
       ProjectResources.append(
         ProjectResource(
           ProjectId = (i + 1),
-          ResourceId = (j + 1),
-          BaselineDemand = json.dumps(BaselineDemand[i])
+          ResourceId = j,
+          BaselineDemand = json.dumps(BaselineDemand[i+(j-s)])
         )
       )      
 
@@ -150,30 +194,80 @@ with app.app_context():
   print('ProjectResources Created!')
 
   # Create a Portfolio in that Workspace
-  Port = Portfolio(
-    Id = '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d4',
-    WorkspaceId = 1,
-    Name = 'Developer',
-    StatusDate = datetime.strptime('2023-01-01', '%Y-%m-%d').date(),
+  Portlist = [
+    {
+      'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d1',
+      'workspaceId': 1
+    },
+    {
+      'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d2',
+      'workspaceId': 1
+    },
+    {
+      'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d3',
+      'workspaceId': 1
+    },
+    {
+      'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d4',
+      'workspaceId': 2
+    },
+    {
+      'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d5',
+      'workspaceId': 2
+    },
+    {
+      'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d6',
+      'workspaceId': 2
+    },
+    {
+      'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d7',
+      'workspaceId': 3
+    },
+    {
+      'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d8',
+      'workspaceId': 3
+    },
+    {
+      'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d9',
+      'workspaceId': 3
+    },
+  ]
+
+  Port = []
+  for i in range(9):
+    Port.append(Portfolio(
+      Id = Portlist[i]['Id'],
+      WorkspaceId = Portlist[i]['workspaceId'],
+      Name = 'Developer',
+      StatusDate = datetime.strptime('2023-01-01', '%Y-%m-%d').date(),
     CreatedByUserId = 1,
     LastModifiedByUserId = 1
-  )
+    ))
 
-  db.session.add(Port)
+  db.session.add_all(Port)
   db.session.commit()
   print('Portfolio Created!')
 
   # For the 3 resources, create a PortfolioResource row
 
   PortfolioResources = []
-  for i in range(3):
-    PortfolioResources.append(
-      PortfolioResource(
-        PortfolioId = '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d4',
-        ResourceId = (i + 1),
-        AdjustedCapacity = json.dumps(BaselineCapacity[i])
+  for i in range(9):
+    s = 1
+    t = 2
+    if i >= 3:
+      s = 2
+      t = 5
+    if i >= 6:
+      s = 5
+      t = 15
+    for j in range(s, t):
+      PortfolioResources.append(
+        PortfolioResource(
+          PortfolioId = Portlist[i]['Id'],
+          ResourceId = j,
+          AdjustedCapacity = json.dumps(BaselineCapacity[j-1])
+        )
       )
-    )
   
   db.session.add_all(PortfolioResources)
   db.session.commit()
@@ -182,33 +276,88 @@ with app.app_context():
   # For the 10 projects, create a PortfolioProject row in the db.
 
   PortfolioProjects = []
-  for i in range(10):
-    PortfolioProjects.append(
-      PortfolioProject(
-        PortfolioId = '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d4',
-        ProjectId = (i+1),
-        AdjustedStartDate = BaselineStartDate[i],
-        AdjustedPriority = Priority[i],
+
+  for i in range(9):
+    s = 1
+    t = 11
+    if i >= 3:
+      s = 11
+      t = 31
+    if i >= 6:
+      s = 31
+      t = 131
+
+    if i % 3 == 1:
+      PortfolioProjects.append(PortfolioProject(
+        PortfolioId = Portlist[i]['Id'],
+        ProjectId = s,
+        AdjustedStartDate = datetime.strptime(BaselineStartDate[(s-1)%15], '%Y-%m-%d').date(),
+        AdjustedPriority = s-1,
         IsSelected = 0,
-      )
-    )
+      ))
+    if i % 3 == 2:
+      for j in range(s, t):
+        PortfolioProjects.append(PortfolioProject(
+          PortfolioId = Portlist[i]['Id'],
+          ProjectId = j,
+          AdjustedStartDate = datetime.strptime(BaselineStartDate[(j-1)%15], '%Y-%m-%d').date(),
+          AdjustedPriority = j-1,
+          IsSelected = 0,
+        ))
 
   db.session.add_all(PortfolioProjects)
   db.session.commit()
   print('PortfolioProjects Created!')
 
   # Create a PortfolioProjectResource for each of the 3 
+  index = [
+    {
+      'pro1': 1,
+      'pro2': [2, 12],
+      'res1': [2, 3],
+      'res2': [3, 4],
+      'pro': 10,
+      'res': 1
+    },
+    {
+      'pro1': 12,
+      'pro2': [13, 33],
+      'res1': [7, 10],
+      'res2': [10, 13],
+      'pro': 20,
+      'res': 3
+    },
+    {
+      'pro1': 33,
+      'pro2': [34, 134],
+      'res1': [23, 33],
+      'res2': [33, 43],
+      'pro': 100,
+      'res': 10
+    }
+  ]
 
-  PortfolioProjectResources = []
-  for i in range(10):
-    for j in range(3):
+  PortfolioProjectResources = [] 
+  box = 0
+  for item in index:
+    for j in range(item['res1'][0], item['res1'][1]):
       PortfolioProjectResources.append(
         PortfolioProjectResource(
-          PortfolioProjectId = (i + 1),
-          PortfolioResourceId = (j + 1),
-          AdjustDemand = json.dumps(BaselineDemand[i])
+          PortfolioProjectId = item['pro1'],
+          PortfolioResourceId = j,
+          AdjustDemand = json.dumps(BaselineDemand[box])
         )
       )
+    for j in range(item['pro2'][0], item['pro2'][1]):
+      for k in range(item['res2'][0], item['res2'][1]):
+        PortfolioProjectResources.append(
+          PortfolioProjectResource(
+            PortfolioProjectId = j,
+            PortfolioResourceId = k,
+            AdjustDemand = json.dumps(BaselineDemand[box])
+          )
+        )
+        box += 1
 
   db.session.add_all(PortfolioProjectResources)
   print('PortfolioProjectResources Created!')
