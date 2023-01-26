@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-export const GET_DATA = gql`query ($workspaceId: ID!){
+export const GET_CHART_DATA = gql`query ($workspaceId: ID!){
   workspace(id: $workspaceId){
     projects{
       edges{
@@ -38,3 +38,30 @@ export const GET_DATA = gql`query ($workspaceId: ID!){
     }
   }
 }`;
+
+export const GET_SELECTOR_DATA = gql`query{
+  workspaceList{
+    edges{
+      node{
+        id,
+        Name,
+        portfolios{
+          edges{
+            node{
+              id,
+              Name
+            }
+          }
+        },
+        resources{
+          edges{
+            node{
+              id,
+              Name
+            }
+          }
+        }
+      }
+    }
+  }
+}`

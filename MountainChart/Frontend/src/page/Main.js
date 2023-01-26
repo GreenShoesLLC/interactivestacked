@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import moment from 'moment';
 
 import MountainChart from 'component/chart/MountainChart';
+import Selector from './Selector';
 
-import { GET_DATA } from 'store/actions/queries/workspace';
+import { GET_CHART_DATA } from 'store/actions/queries/workspace';
 import { UPDATE_CAPACITY_BY_DRAG } from 'store/actions/mutations/resource';
 import { UPDATE_PRORES_BY_RESIZE } from 'store/actions/mutations/projectReource';
 import { UPDATE_PROJECT_BY_DRAG } from 'store/actions/mutations/project';
@@ -12,20 +13,11 @@ import { UPDATE_PROJECT_BY_DRAG } from 'store/actions/mutations/project';
 const Main = () => {
 
   const [filter, setFilter] = useState({
-    resource: 'Developers',
+    resource: 'Developers0',
     portfolio: 'Portfolio1'
   });
-
-  const chartRef = useRef(null), portRef = useRef(null), resRef = useRef(null);
-
-  const resourceType = {
-    'Developers':'Developers',
-    'QA':'QA',
-    'Business Analyst': 'Business Analyst'
-  };
-  const portfolioType = ['Portfolio1', 'Portfolio2'];
   
-  const { data, refetch } = useQuery(GET_DATA, {
+  const { data, refetch } = useQuery(GET_CHART_DATA, {
     notifyOnNetworkStatusChange: true,
     variables: {workspaceId: 'V29ya3NwYWNlOjE='}
   });
@@ -48,13 +40,6 @@ const Main = () => {
       refetch();
     }
   });
-
-  const handleMethod = () => {
-    setFilter({
-      resource: resRef.current.value,
-      portfolio: portRef.current.value
-    });
-  }
 
   const convertData = (data) => {
     if(!data) return;
@@ -120,39 +105,6 @@ const Main = () => {
       default:
         break;
     }
-  }
-
-  const Selector = () => {
-    return (
-      <div id = "selector">
-        <ul>
-          <li className="select">
-            <select id="standard-select" ref={chartRef} onChange={handleMethod}>
-              <option value="c1">MountainChart-1</option>
-              <option value="c2">MountainChart-2</option>
-            </select>
-          </li>
-          <li className="select">
-            <select id="standard-select" ref={portRef} onChange={handleMethod} defaultValue={filter.portfolio}>
-              {
-                portfolioType.map((item, index) => (
-                  <option value={item} key={index}>{item}</option>
-                ))
-              }
-            </select>
-          </li>
-          <li className="select">
-            <select id="standard-select" ref={resRef} onChange={handleMethod} defaultValue={filter.resource}>
-              {
-                Object.keys(resourceType).map((key) => (
-                  <option value={resourceType[key]} key={key}>{key}</option>
-                ))
-              }
-            </select>
-          </li>
-        </ul>
-      </div>
-    );
   }
 
   return ( 

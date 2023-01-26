@@ -197,7 +197,7 @@ with app.app_context():
   Portlist = [
     {
       'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d1',
-      'workspaceId': 1
+      'workspaceId': 1,
     },
     {
       'Id': '2ca64e7b-7d3e-4337-86cf-f3a4e0b783d2',
@@ -238,7 +238,7 @@ with app.app_context():
     Port.append(Portfolio(
       Id = Portlist[i]['Id'],
       WorkspaceId = Portlist[i]['workspaceId'],
-      Name = 'Developer',
+      Name = 'Portfolio' + str(i+1),
       StatusDate = datetime.strptime('2023-01-01', '%Y-%m-%d').date(),
     CreatedByUserId = 1,
     LastModifiedByUserId = 1

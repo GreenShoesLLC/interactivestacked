@@ -82,6 +82,8 @@ class Portfolio(db.Model):
   CreatedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
   LastModifiedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
 
+  workspace = db.relationship('Workspace', backref='portfolios')
+
   def save(self):
     db.session.add(self)
     db.session.commit()
