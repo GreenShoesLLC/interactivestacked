@@ -22,10 +22,15 @@ const WorkspaceTable = ({ workspaceId }) => {
       dataIndex: 'Name',
       key: 'Name',
       onCell: (record) => {
-          if(record.child) {
-            return {
-              rowspan: record.child 
-            }
+        if(record.child) {
+          return {
+            rowSpan: record.child
+          }
+        }
+        if(record.double) {
+          return {
+            rowSpan: 0
+          }
         }
       }
     },
@@ -35,13 +40,37 @@ const WorkspaceTable = ({ workspaceId }) => {
       key: 'Color',
       width: '5%',
       align: 'center',
+      onCell: (record) => {
+        if(record.child) {
+          return {
+            rowSpan: record.child
+          }
+        }
+        if(record.double) {
+          return {
+            rowSpan: 0
+          }
+        }
+      },
       render: (value) => <Tag color={value} style={{padding:10}}></Tag>
     },
     {
       title: 'BaselineStartDate',
       dataIndex: 'BaselineStartDate',
       key: 'BaselineStartDate',
-      align: 'center'
+      align: 'center',
+      onCell: (record) => {
+        if(record.child) {
+          return {
+            rowSpan: record.child
+          }
+        }
+        if(record.double) {
+          return {
+            rowSpan: 0
+          }
+        }
+      }
     },
     {
       title: 'AdjustedStartDate',
@@ -52,7 +81,19 @@ const WorkspaceTable = ({ workspaceId }) => {
     {
       title: 'BaselinePriority',
       dataIndex: 'BaselinePriority',
-      key: 'BaselinePriority'
+      key: 'BaselinePriority',
+      onCell: (record) => {
+        if(record.child) {
+          return {
+            rowSpan: record.child
+          }
+        }
+        if(record.double) {
+          return {
+            rowSpan: 0
+          }
+        }
+      }
     },
     {
       title: 'AdjustedPriority',

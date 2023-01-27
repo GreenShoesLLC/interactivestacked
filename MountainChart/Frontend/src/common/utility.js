@@ -99,6 +99,7 @@ export const convertTableData = (data) => {
     let state = true;
     Projects.edges.map((item) => {
       let { Id, IsSelected, AdjustedPriority, AdjustedStartDate } = item.node;
+      
       projectList.push({
         key: Id,
         Name, 
@@ -110,7 +111,8 @@ export const convertTableData = (data) => {
         IsSelected,
         AdjustedPriority,
         AdjustedStartDate: moment(AdjustedStartDate).format('YYYY.MM'),
-        ...state && (child > 1) ? { child } : ''
+        child: state && (child > 1) ? child : 0,
+        ... !state && (child > 1) ? {double:true} : ''
       });
       state = false;
     })
