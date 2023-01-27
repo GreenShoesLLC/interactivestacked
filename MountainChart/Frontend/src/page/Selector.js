@@ -3,6 +3,8 @@ import { useQuery } from '@apollo/client';
 
 import { GET_SELECTOR_DATA } from 'store/actions/queries/workspace';
 
+import { convertSelectorData } from 'common/utility';
+
 const Selector = ({stateChange}) => {
 
   const [workspace, setWorkspace] = useState([]);
@@ -12,7 +14,7 @@ const Selector = ({stateChange}) => {
   const { data } = useQuery(GET_SELECTOR_DATA, {
     notifyOnNetworkStatusChange: true,
     onCompleted: (res) => {
-      const { all, worklist } = convertData(res);
+      const { all, worklist } = convertSelectorData(res);
       setWorkspace(all);
       setSelectedWork(worklist[0]);
     }
@@ -37,37 +39,6 @@ const Selector = ({stateChange}) => {
       resource: resourceRef.current.value, 
       portfolio: portfolioRef.current.value
     });
-  }
-
-  const convertData = (data) => {
-    if(!data) return;
-    const { workspaceList } = data;
-    let all = {};
-    let worklist = [];
-
-    workspaceList.edges.map((row) => {
-      const { id, Name, portfolios, resources } = row.node;
-      let portfolio = [];
-      let resource = [];
-      
-      portfolios.edges.map((item) => {
-        const { id, Name } = item.node;
-        portfolio.push({id, Name});
-      });
-      resources.edges.map((item1) => {
-        resource.push(item1.node.Name);
-      });
-
-      worklist.push(Name);
-
-      all[Name] = { id, portfolio, resource };
-
-    });
-
-    return {
-      worklist,
-      all
-    }
   }
 
   return (

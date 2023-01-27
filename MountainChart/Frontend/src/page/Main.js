@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useLazyQuery } from '@apollo/client';
-import moment from 'moment';
 
 import MountainChart from 'component/chart/MountainChart';
 import Selector from './Selector';
@@ -9,6 +8,8 @@ import { GET_CHART_DATA } from 'store/actions/queries/workspace';
 import { UPDATE_ADJUSTEDCAPACITY_BY_DRAG } from 'store/actions/mutations/portfolioResource';
 import { UPDATE_PORTFOLIOPRORES_BY_RESIZE } from 'store/actions/mutations/portfolioProRes';
 import { UPDATE_PORTFOLIOPROJECT_BY_DRAG } from 'store/actions/mutations/portfolioProject';
+
+import { convertChartData } from 'common/utility';
 
 const Main = () => {
 
@@ -52,63 +53,6 @@ const Main = () => {
     setFilter({ resource, portfolio });
   };
 
-  const convertData = (data) => {
-    if(!data || !data.portfolio) return;
-    const { PortProjects, PortResources } = data.portfolio;
-    let Capacity = {};
-    let Project = {};
-    let Demand= [];
-
-    if(!PortProjects.edges) {
-      return {
-        Capacity,
-        Project,
-        Demand
-      };
-    }
-
-    PortProjects.edges.map((row) => {
-      let { Id, AdjustedStartDate, AdjustedPriority, project } = row.node;
-      let { Name, Color, StrokeColor } = project;
-      Project[Name] = {
-        Id,
-        start: moment(AdjustedStartDate).format('YYYY.MM'),
-        priority: AdjustedPriority,
-        color: Color,
-        strokecolor: StrokeColor
-      }
-    });
-
-    PortResources.edges.map((row) => {
-      let { Id, AdjustedCapacity, resource, PortProRes } = row.node;
-      let { Name, StartAt } = resource;
-
-      if( Name === filter.resource ) {
-        Capacity = {
-          Id,
-          AdjustedCapacity: JSON.parse(AdjustedCapacity),
-          startAt: moment(StartAt).format('YYYY.MM')
-        }
-
-        PortProRes.edges.map((item) => {
-          let { AdjustedDemand, portProject, PortfolioProjectId, PortfolioResourceId } = item.node;
-          Demand.push({
-            name: portProject.project.Name,
-            data: JSON.parse(AdjustedDemand),
-            pId: PortfolioProjectId,
-            rId: PortfolioResourceId
-          })
-        });
-      }
-    });
-
-    return {
-      Capacity,
-      Project,
-      Demand
-    };
-  };
-
   const onSourceChange = async (change) => {
     const {state, newData} = change;
     switch(state) {
@@ -136,7 +80,7 @@ const Main = () => {
       <Selector stateChange = {onFilterChange}/>
       <MountainChart  
         title = {'MountainChart-1'}
-        chartdata = {convertData(data)}
+        chartdata = {convertChartData(data, filter)}
         AxisXMin = {2022}
         AxisXMax = {2026}
         AxisXLabel = {'Time'}
