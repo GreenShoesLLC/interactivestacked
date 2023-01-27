@@ -3,7 +3,7 @@ from .workspace import Workspace, CreateWorkspace, UpdateWorkspace, DeleteWorksp
 from .project import Project, CreateProject, UpdateProject, UpdateMultiProject, DeleteProject
 from .mresource import MResource, CreateResource, UpdateResource, DeleteResource
 from .portfolio import Portfolio, CreatePortfolio, UpdatePortfolio, DeletePortfolio
-from .portfolioProject import PortProject, CreatePortProject, UpdatePortProject, DeletePortProject
+from .portfolioProject import PortProject, CreatePortProject, UpdatePortProject, UpdateMultiPortProject, DeletePortProject
 from .portfolioResource import PortResource, CreatePortResource, UpdatePortResource, DeletePortResource
 from .projectResource import ProResource, CreateProResource, UpdateProResource, DeleteProResource
 from .portfolioProRes import PortfolioProRes, CreatePortfolioProRes, UpdatePortfolioProRes, DeletePortfolioProRes
@@ -60,6 +60,7 @@ class Mutation(graphene.ObjectType):
 
   createPortProject = CreatePortProject.Field()
   updatePortProject = UpdatePortProject.Field()
+  updateMultiPortProject = UpdateMultiPortProject.Field()
   deletePortProject = DeletePortProject.Field()
 
   createPortResource = CreatePortResource.Field()

@@ -7,7 +7,7 @@ from graphene import relay, InputObjectType, Mutation
 class PortfolioProResAttribute:
   PortfolioProjectId = graphene.Int()
   PortfolioResourceId = graphene.Int()
-  AdjustDemand = graphene.String()
+  AdjustedDemand = graphene.String()
 
 class PortfolioProRes(SQLAlchemyObjectType):
 
@@ -51,7 +51,7 @@ class UpdatePortfolioProRes(Mutation):
 
     uportfolioProRes = db.session.query(PortfolioProResModel).filter_by(PortfolioProjectId = data['PortfolioProjectId'], PortfolioResourceId = data['PortfolioResourceId']).first()
 
-    uportfolioProRes.AdjustDemand = data['AdjustDemand']
+    uportfolioProRes.AdjustedDemand = data['AdjustedDemand']
 
     db.session.commit()
 

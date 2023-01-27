@@ -345,7 +345,7 @@ with app.app_context():
         PortfolioProjectResource(
           PortfolioProjectId = item['pro1'],
           PortfolioResourceId = j,
-          AdjustDemand = json.dumps(BaselineDemand[box])
+          AdjustedDemand = json.dumps(BaselineDemand[box])
         )
       )
     for j in range(item['pro2'][0], item['pro2'][1]):
@@ -354,7 +354,7 @@ with app.app_context():
           PortfolioProjectResource(
             PortfolioProjectId = j,
             PortfolioResourceId = k,
-            AdjustDemand = json.dumps(BaselineDemand[box])
+            AdjustedDemand = json.dumps(BaselineDemand[box])
           )
         )
         box += 1

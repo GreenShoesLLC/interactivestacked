@@ -1,34 +1,40 @@
 import { gql } from '@apollo/client';
 
-export const GET_CHART_DATA = gql`query ($workspaceId: ID!){
-  workspace(id: $workspaceId){
-    projects{
+export const GET_CHART_DATA = gql`query ($portfolioId: ID!){
+  portfolio(id: $portfolioId){
+    PortProjects{
       edges{
         node{
-          Id,
-          Name,
-          BaselineStartDate,
-          BaselinePriority,
-          Color,
-          StrokeColor
+          Id
+          AdjustedStartDate
+          AdjustedPriority
+          project{
+            Name
+            Color
+            StrokeColor
+          }
         }
       }
-    },
-    resources{
+    }
+    PortResources{
       edges{
         node{
-          Id,
-          Name,
-          BaselineCapacity,
-          StartAt
-          pro{
+          Id
+          AdjustedCapacity
+          resource{
+            Name
+            StartAt
+          }
+          PortProRes{
             edges{
               node{
-                ProjectId,
-                ResourceId,
-                BaselineDemand
-                project{
-                  Name
+                PortfolioProjectId
+                PortfolioResourceId
+                AdjustedDemand
+                portProject{
+                  project{
+                    Name
+                  }
                 }
               }
             }

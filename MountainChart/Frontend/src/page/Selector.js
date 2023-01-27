@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@apollo/client';
 
 import { GET_SELECTOR_DATA } from 'store/actions/queries/workspace';
 
-const Selector = () => {
+const Selector = ({stateChange}) => {
 
   const [workspace, setWorkspace] = useState([]);
   const [selectedWork, setSelectedWork] = useState('');
@@ -18,12 +18,25 @@ const Selector = () => {
     }
   });
 
-  const handleMethod = () => {
+  useEffect(() => {
+    if(selectedWork && stateChange) { 
+      stateChange({
+        id: workspace[selectedWork].id,
+        resource: resourceRef.current.value, 
+        portfolio: portfolioRef.current.value
+      });
+    }
+  }, [selectedWork]);
+
+  const handleWorkspace = () => {
     setSelectedWork(workspaceRef.current.value);
-    // setFilter({
-    //   resource: resRef.current.value,
-    //   portfolio: portRef.current.value
-    // });
+  }
+
+  const handleMethod = () => {
+    stateChange({
+      resource: resourceRef.current.value, 
+      portfolio: portfolioRef.current.value
+    });
   }
 
   const convertData = (data) => {
@@ -31,18 +44,21 @@ const Selector = () => {
     const { workspaceList } = data;
     let all = {};
     let worklist = [];
+
     workspaceList.edges.map((row) => {
       const { id, Name, portfolios, resources } = row.node;
       let portfolio = [];
       let resource = [];
       
-      worklist.push(Name);
       portfolios.edges.map((item) => {
-        portfolio.push(item.node.Name);
+        const { id, Name } = item.node;
+        portfolio.push({id, Name});
       });
       resources.edges.map((item1) => {
         resource.push(item1.node.Name);
       });
+
+      worklist.push(Name);
 
       all[Name] = { id, portfolio, resource };
 
@@ -58,7 +74,7 @@ const Selector = () => {
     <div id = "selector">
       <ul>
         <li className="select">
-          <select id="standard-select" ref={workspaceRef} onChange={handleMethod}>
+          <select id="standard-select" ref={workspaceRef} onChange={handleWorkspace}>
             {
               Object.keys(workspace).map((key) => (
                 <option value={key} key={workspace[key]['id']}>{key}</option>
@@ -67,16 +83,20 @@ const Selector = () => {
           </select>
         </li>
         <li className="select">
-          <select id="standard-select" ref={portfolioRef} onChange={handleMethod}>
+          <select id="standard-select" 
+            ref={portfolioRef} 
+            onChange={handleMethod}>
             {
-              workspace[selectedWork] && workspace[selectedWork].portfolio.map((item, index) => (
-                <option value={item} key={index}>{item}</option>
+              workspace[selectedWork] && workspace[selectedWork].portfolio.map(({id, Name}) => (
+                <option value={id} key={id}>{Name}</option>
               ))
             }
           </select>
         </li>
         <li className="select">
-          <select id="standard-select" ref={resourceRef} onChange={handleMethod} defaultValue={''}>
+          <select id="standard-select" 
+            ref={resourceRef} 
+            onChange={handleMethod}>
             {
               workspace[selectedWork] && workspace[selectedWork].resource.map((item, index) => (
                 <option value={item} key={index}>{item}</option>

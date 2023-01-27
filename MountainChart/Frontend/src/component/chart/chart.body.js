@@ -32,14 +32,14 @@ const ChartBody = (props) => {
   let timer;
 
   useEffect(() => {
-    const { AxisXLabel, AxisYLabel, chartdata, filter } = props.datasource;
+    const { AxisXLabel, AxisYLabel, chartdata,} = props.datasource;
     if(chartdata) {
-      const { cap, project, portfolio } = chartdata;
-      setDisplayData(portfolio[filter.resource]);
-      setCapacityData(cap[filter.resource]['BaselineCapacity']);
-      setCapStartAt(cap[filter.resource]['startAt']);
-      setCapIndex(cap[filter.resource]['Id']);
-      setProjectData(project);
+      const { Capacity, Project, Demand } = chartdata;
+      setDisplayData(Demand);
+      setCapacityData(Capacity['AdjustedCapacity']);
+      setCapStartAt(Capacity['startAt']);
+      setCapIndex(Capacity['Id']);
+      setProjectData(Project);
       setLabel({X:AxisXLabel, Y:AxisYLabel});
       setLoading(props.loading);
     }
@@ -207,8 +207,8 @@ const ChartBody = (props) => {
           let { Id, priority, start } = projectData[key];
           tmpData.push({
             Id: Id,
-            BaselinePriority: priority,
-            BaselineStartDate: moment(new Date(start)).format('YYYY-MM-DD')
+            AdjustedPriority: priority,
+            AdjustedStartDate: moment(new Date(start)).format('YYYY-MM-DD')
           });
         });
         stateChange({state: 'drag', newData: tmpData});
@@ -247,11 +247,13 @@ const ChartBody = (props) => {
   }
 
   const capacityColor = (state) => {
-    const i = selectedID.split('-')[1];
-    for(let j = ctrlKey ? 0 : i; j < capacityData.length; j++) {
-      let element = document.getElementById(`${chartId}-${j}`);
-      if(!element) continue;
-      element.style.border = state ? '1px solid #0000cc' : '1px dashed #cc0000';
+    if(selectedID && capacityData) {
+      const i = selectedID.split('-')[1];
+      for(let j = ctrlKey ? 0 : i; j < capacityData.length; j++) {
+        let element = document.getElementById(`${chartId}-${j}`);
+        if(!element) continue;
+        element.style.border = state ? '1px solid #0000cc' : '1px dashed #cc0000';
+      }
     }
   }
 

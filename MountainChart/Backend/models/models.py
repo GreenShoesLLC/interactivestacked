@@ -103,6 +103,7 @@ class PortfolioProject(db.Model, BaseModel2):
   AdjustedPriority = db.Column(db.Integer, nullable=False)
 
   portfolio = db.relationship('Portfolio', backref='PortProjects')
+  project = db.relationship('Project', backref='Projects')
 
 class PortfolioResource(db.Model, BaseModel2):
 
@@ -112,7 +113,8 @@ class PortfolioResource(db.Model, BaseModel2):
   ResourceId = db.Column(db.Integer, db.ForeignKey(Resource.Id), nullable=False)
   AdjustedCapacity = db.Column(db.Text)
 
-  Portfolio = db.relationship('Portfolio', backref='PortResources')
+  portfolio = db.relationship('Portfolio', backref='PortResources')
+  resource = db.relationship('Resource', backref='Resources')
 
 class PortfolioProjectResource(db.Model, BaseModel2):
 
@@ -120,4 +122,7 @@ class PortfolioProjectResource(db.Model, BaseModel2):
 
   PortfolioProjectId = db.Column(db.Integer, db.ForeignKey(PortfolioProject.Id), nullable=False)
   PortfolioResourceId = db.Column(db.Integer, db.ForeignKey(PortfolioResource.Id), nullable=False)
-  AdjustDemand = db.Column(db.Text, nullable=False)
+  AdjustedDemand = db.Column(db.Text, nullable=False)
+
+  portProject = db.relationship('PortfolioProject', backref='PortProRes')
+  portResource = db.relationship('PortfolioResource', backref='PortProRes')

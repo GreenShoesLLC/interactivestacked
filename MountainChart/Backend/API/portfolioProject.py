@@ -61,6 +61,28 @@ class UpdatePortProject(Mutation):
 
     return UpdatePortProject(ok=True, portProject=portProject)
 
+class UpdateMultiPortProjectInput(InputObjectType):
+  PortProjectList = graphene.List(UpdatePortProjectInput)
+
+class UpdateMultiPortProject(Mutation):
+  ok = graphene.Boolean()
+
+  class Arguments:
+    input = UpdateMultiPortProjectInput(required=False)
+
+  def mutate(self, info, input):
+    data = input_to_dictionary(input)
+
+    for item in data['PortProjectList']:
+      uproproject = db.session.query(PortProjectModel).filter_by(Id=item['Id']).first()
+
+      uproproject.AdjustedStartDate = item['AdjustedStartDate']
+      uproproject.AdjustedPriority = item['AdjustedPriority']
+
+      db.session.commit()
+
+    return UpdatePortProject(ok=True)
+
 class DeletePortProjectInput(InputObjectType, PortProjectAttribute):
   Id = graphene.Int()
 

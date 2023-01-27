@@ -50,9 +50,12 @@ class UpdatePortResource(Mutation):
 
     portResource = db.session.query(PortResourceModel).filter_by(Id=data['Id']).first()
     
-    portResource.PortfolioId = data['PortfolioId']
-    portResource.ResourceId = data['ResourceId']
-    portResource.AdjustedCapacity = data['AdjustedCapacity']
+    if 'PortfolioId' in data:
+      portResource.PortfolioId = data['PortfolioId']
+    if 'ResourceId' in data:
+      portResource.ResourceId = data['ResourceId']
+    if 'AdjustedCapacity' in data:
+      portResource.AdjustedCapacity = data['AdjustedCapacity']
 
     db.session.commit()
 
