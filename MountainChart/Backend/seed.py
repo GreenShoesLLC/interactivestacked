@@ -240,8 +240,8 @@ with app.app_context():
       WorkspaceId = Portlist[i]['workspaceId'],
       Name = 'Portfolio' + str(i+1),
       StatusDate = datetime.strptime('2023-01-01', '%Y-%m-%d').date(),
-    CreatedByUserId = 1,
-    LastModifiedByUserId = 1
+      CreatedByUserId = 1,
+      LastModifiedByUserId = 1
     ))
 
   db.session.add_all(Port)
@@ -293,7 +293,7 @@ with app.app_context():
         ProjectId = s,
         AdjustedStartDate = datetime.strptime(BaselineStartDate[(s-1)%15], '%Y-%m-%d').date(),
         AdjustedPriority = s-1,
-        IsSelected = 0,
+        IsSelected = 1,
       ))
     if i % 3 == 2:
       for j in range(s, t):
@@ -302,7 +302,7 @@ with app.app_context():
           ProjectId = j,
           AdjustedStartDate = datetime.strptime(BaselineStartDate[(j-1)%15], '%Y-%m-%d').date(),
           AdjustedPriority = j-1,
-          IsSelected = 0,
+          IsSelected = 1,
         ))
 
   db.session.add_all(PortfolioProjects)

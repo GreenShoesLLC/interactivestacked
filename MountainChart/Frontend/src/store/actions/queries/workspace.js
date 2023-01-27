@@ -1,50 +1,5 @@
 import { gql } from '@apollo/client';
 
-export const GET_CHART_DATA = gql`query ($portfolioId: ID!){
-  portfolio(id: $portfolioId){
-    PortProjects{
-      edges{
-        node{
-          Id
-          AdjustedStartDate
-          AdjustedPriority
-          project{
-            Name
-            Color
-            StrokeColor
-          }
-        }
-      }
-    }
-    PortResources{
-      edges{
-        node{
-          Id
-          AdjustedCapacity
-          resource{
-            Name
-            StartAt
-          }
-          PortProRes{
-            edges{
-              node{
-                PortfolioProjectId
-                PortfolioResourceId
-                AdjustedDemand
-                portProject{
-                  project{
-                    Name
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}`;
-
 export const GET_SELECTOR_DATA = gql`query{
   workspaceList{
     edges{
@@ -70,4 +25,31 @@ export const GET_SELECTOR_DATA = gql`query{
       }
     }
   }
-}`
+}`;
+
+export const GET_TABLE_DATA = gql`query ($workspaceId: ID!){
+  workspace(id: $workspaceId) {
+    projects{
+      edges{
+        node{
+          Name
+          BaselineStartDate
+          BaselinePriority
+          Color
+          StrokeColor
+          Tags
+          Projects{
+            edges{
+              node{
+                Id
+                IsSelected
+                AdjustedStartDate
+                AdjustedPriority
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}`;

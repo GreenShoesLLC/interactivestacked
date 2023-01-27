@@ -58,7 +58,7 @@ export const convertChartData = (data, filter) => {
 };
 
 export const convertSelectorData = (data) => {
-  if(!data) return;
+  if(!data || !data.workspaceList) return;
   const { workspaceList } = data;
   let all = {};
   let worklist = [];
@@ -86,4 +86,35 @@ export const convertSelectorData = (data) => {
     worklist,
     all
   }
+}
+
+export const convertTableData = (data) => {
+  if(!data || !data.workspace) return;
+
+  const { projects } = data.workspace;
+  let projectList = [];
+  projects.edges.map((row) => {
+    let { Name, BaselineStartDate, BaselinePriority, Color, StrokeColor, Tags, Projects } = row.node;
+    let child = Projects.edges.length;
+    let state = true;
+    Projects.edges.map((item) => {
+      let { Id, IsSelected, AdjustedPriority, AdjustedStartDate } = item.node;
+      projectList.push({
+        key: Id,
+        Name, 
+        BaselineStartDate: moment(BaselineStartDate).format('YYYY.MM'), 
+        BaselinePriority, 
+        Color, 
+        StrokeColor, 
+        Tags,
+        IsSelected,
+        AdjustedPriority,
+        AdjustedStartDate: moment(AdjustedStartDate).format('YYYY.MM'),
+        ...state && (child > 1) ? { child } : ''
+      });
+      state = false;
+    })
+  });
+
+  return projectList;
 }

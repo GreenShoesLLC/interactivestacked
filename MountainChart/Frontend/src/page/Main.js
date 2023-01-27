@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useMutation, useQuery, useLazyQuery } from '@apollo/client';
+import { useMutation, useLazyQuery } from '@apollo/client';
 
 import MountainChart from 'component/chart/MountainChart';
 import Selector from './Selector';
+import WorkspaceTable from './Table';
 
-import { GET_CHART_DATA } from 'store/actions/queries/workspace';
+import { GET_CHART_DATA } from 'store/actions/queries/portfolio';
 import { UPDATE_ADJUSTEDCAPACITY_BY_DRAG } from 'store/actions/mutations/portfolioResource';
 import { UPDATE_PORTFOLIOPRORES_BY_RESIZE } from 'store/actions/mutations/portfolioProRes';
 import { UPDATE_PORTFOLIOPROJECT_BY_DRAG } from 'store/actions/mutations/portfolioProject';
@@ -78,6 +79,7 @@ const Main = () => {
   return ( 
     <>
       <Selector stateChange = {onFilterChange}/>
+      <WorkspaceTable workspaceId={workspaceId}/>
       <MountainChart  
         title = {'MountainChart-1'}
         chartdata = {convertChartData(data, filter)}
@@ -89,18 +91,16 @@ const Main = () => {
         AxisYInterval = {5}
         stateChange = {onSourceChange}
         />
-      {/* <MountainChart
+      <MountainChart
         title = {'MountainChart-2'}
-        chartdata = {convertData(data)}
+        chartdata = {convertChartData(data, filter)}
         AxisXMin = {2023}
         AxisXMax = {2026}
         AxisXLabel = {'year/month'}
         AxisYMax = {40}
         AxisYInterval = {5}
         stateChange = {onSourceChange}
-        filter = {filter}
-        loading = {loading}
-        /> */}
+        />
     </>
   )
 }
