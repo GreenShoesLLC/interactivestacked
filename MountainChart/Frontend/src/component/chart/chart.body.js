@@ -386,7 +386,7 @@ const ChartBody = (props) => {
           } 
         }
         if( moveUpDown && (e.pageY < oldY) ) {
-          let start = 0, count = 0, priority = 0, project = null;
+          let start = 0, count = 0, priority = -1, project = null;
           for(let index = 0; index < length; index++) {
             const id  = `${chartId}-${parseInt(i)}-${index}`;
             let select = document.getElementById(id);
@@ -464,7 +464,6 @@ const ChartBody = (props) => {
         }
         oldY = e.pageY;
       }, 0);
-  
     }
   }  
 
