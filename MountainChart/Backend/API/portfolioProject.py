@@ -9,6 +9,7 @@ class PortProjectAttribute:
   ProjectId = graphene.Int()
   AdjustedStartDate = graphene.Date()
   AdjustedPriority = graphene.Int()
+  IsSelected = graphene.Int()
 
 class PortProject(SQLAlchemyObjectType):
 
@@ -41,25 +42,26 @@ class UpdatePortProjectInput(InputObjectType, PortProjectAttribute):
   Id = graphene.Int()
 
 class UpdatePortProject(Mutation):
-  portProject = graphene.Field(lambda: PortProject)
   ok = graphene.Boolean()
 
   class Arguments:
-    input = UpdatePortProjectInput(required=True)
+    input = UpdatePortProjectInput(required=False)
 
   def mutate(self, info, input):
     data = input_to_dictionary(input)
 
     portProject = db.session.query(PortProjectModel).filter_by(Id=data['Id']).first()
     
-    portProject.PortfolioId = data['PortfolioId']
-    portProject.ProjectId = data['ProjectId']
-    portProject.AdjustedStartDate = data['AdjustedStartDate']
-    portProject.AdjustedPriority = data['AdjustedPriority']
+    if 'AdjustedStartDate' in data:
+      portProject.AdjustedStartDate = data['AdjustedStartDate']
+    if 'AdjustedPriority' in data:
+      portProject.AdjustedPriority = data['AdjustedPriority']
+    if 'IsSelected' in data:
+      portProject.IsSelected = 1 - portProject.IsSelected
 
     db.session.commit()
 
-    return UpdatePortProject(ok=True, portProject=portProject)
+    return UpdatePortProject(ok=True)
 
 class UpdateMultiPortProjectInput(InputObjectType):
   PortProjectList = graphene.List(UpdatePortProjectInput)

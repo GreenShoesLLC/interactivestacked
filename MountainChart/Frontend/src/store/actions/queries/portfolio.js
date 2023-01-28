@@ -6,6 +6,7 @@ export const GET_CHART_DATA = gql`query ($portfolioId: ID!){
       edges{
         node{
           Id
+          IsSelected
           AdjustedStartDate
           AdjustedPriority
           project{

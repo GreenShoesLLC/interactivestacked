@@ -16,14 +16,17 @@ export const convertChartData = (data, filter) => {
   }
 
   PortProjects.edges.map((row) => {
-    let { Id, AdjustedStartDate, AdjustedPriority, project } = row.node;
-    let { Name, Color, StrokeColor } = project;
-    Project[Name] = {
-      Id,
-      start: moment(AdjustedStartDate).format('YYYY.MM'),
-      priority: AdjustedPriority,
-      color: Color,
-      strokecolor: StrokeColor
+    let { Id, AdjustedStartDate, AdjustedPriority, project, IsSelected } = row.node;
+    
+    if(IsSelected) {
+      let { Name, Color, StrokeColor } = project;
+      Project[Name] = {
+        Id,
+        start: moment(AdjustedStartDate).format('YYYY.MM'),
+        priority: AdjustedPriority,
+        color: Color,
+        strokecolor: StrokeColor
+      }
     }
   });
 
@@ -40,12 +43,14 @@ export const convertChartData = (data, filter) => {
 
       PortProRes.edges.map((item) => {
         let { AdjustedDemand, portProject, PortfolioProjectId, PortfolioResourceId } = item.node;
-        Demand.push({
-          name: portProject.project.Name,
-          data: JSON.parse(AdjustedDemand),
-          pId: PortfolioProjectId,
-          rId: PortfolioResourceId
-        })
+        if(Project[portProject.project.Name]) {
+          Demand.push({
+            name: portProject.project.Name,
+            data: JSON.parse(AdjustedDemand),
+            pId: PortfolioProjectId,
+            rId: PortfolioResourceId
+          })
+        }
       });
     }
   });
@@ -99,7 +104,6 @@ export const convertTableData = (data) => {
     let state = true;
     Projects.edges.map((item) => {
       let { Id, IsSelected, AdjustedPriority, AdjustedStartDate } = item.node;
-      
       projectList.push({
         key: Id,
         Name, 

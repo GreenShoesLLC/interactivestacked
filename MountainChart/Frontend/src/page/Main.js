@@ -79,7 +79,7 @@ const Main = () => {
   return ( 
     <>
       <Selector stateChange = {onFilterChange}/>
-      <WorkspaceTable workspaceId={workspaceId}/>
+      <WorkspaceTable workspaceId={workspaceId} refetch={refetch}/>
       <MountainChart  
         title = {'MountainChart-1'}
         chartdata = {convertChartData(data, filter)}

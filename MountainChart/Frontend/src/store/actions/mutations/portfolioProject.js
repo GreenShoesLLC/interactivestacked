@@ -8,3 +8,14 @@ export const UPDATE_PORTFOLIOPROJECT_BY_DRAG = gql`
       ok
     }
   }`;
+
+export const UPDATE_PORTFOLIOPROJECT_ISSELECTED = gql`
+  mutation ($Id: Int!){
+    updatePortProject(input: {
+      Id: $Id,
+      IsSelected: 1
+    }){
+      ok
+    }
+  }
+  `;

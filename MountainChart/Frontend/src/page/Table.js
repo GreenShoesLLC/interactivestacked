@@ -1,14 +1,25 @@
 import React, { useEffect } from 'react';
 import { Table, Tag, Checkbox } from 'antd';
-import { useLazyQuery } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 
 import { GET_TABLE_DATA } from 'store/actions/queries/workspace';
+import { UPDATE_PORTFOLIOPROJECT_ISSELECTED } from 'store/actions/mutations/portfolioProject';
 import { convertTableData } from 'common/utility';
 
-const WorkspaceTable = ({ workspaceId }) => {
+const WorkspaceTable = ({ workspaceId, refetch }) => {
   const [getData, { data }] = useLazyQuery(GET_TABLE_DATA, {
     notifyOnNetworkStatusChange: true
   });
+  const [IsSelectedProject] = useMutation(UPDATE_PORTFOLIOPROJECT_ISSELECTED, {
+    notifyOnNetworkStatusChange: true,
+  });
+
+  const handleSelected = (Id) => {
+    return async () => {
+      await IsSelectedProject({variables: {Id}});
+      refetch();
+    }
+  }
 
   useEffect(() => {
     if(workspaceId) {
@@ -52,7 +63,7 @@ const WorkspaceTable = ({ workspaceId }) => {
           }
         }
       },
-      render: (value) => <Tag color={value} style={{padding:10}}></Tag>
+      render: (value, record) => <Tag color={value} style={{padding:10, border:`1px solid ${record.StrokeColor}`}}></Tag>
     },
     {
       title: 'BaselineStartDate',
@@ -104,7 +115,7 @@ const WorkspaceTable = ({ workspaceId }) => {
       title: 'IsSelected',
       dataIndex: 'IsSelected',
       key: 'IsSelected',
-      render: (value) => <Checkbox defaultChecked={ value } onChange={(e) =>{}}></Checkbox>
+      render: (value, record) => <Checkbox defaultChecked={ value } onChange={handleSelected(record.key)}></Checkbox>
     },
     {
       title: 'Tags',
