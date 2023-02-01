@@ -287,77 +287,90 @@ with app.app_context():
       s = 31
       t = 131
 
+    select = 0
+    num = 0
     if i % 3 == 1:
-      PortfolioProjects.append(PortfolioProject(
-        PortfolioId = Portlist[i]['Id'],
-        ProjectId = s,
-        AdjustedStartDate = datetime.strptime(BaselineStartDate[(s-1)%15], '%Y-%m-%d').date(),
-        AdjustedPriority = s-1,
-        IsSelected = 1,
-      ))
+      num = random.randrange(s, t)
     if i % 3 == 2:
-      for j in range(s, t):
-        PortfolioProjects.append(PortfolioProject(
+      select = 1
+    for j in range(s, t):
+      if num != 0 :
+        select = 0
+        if j == num:
+          select = 1
+      PortfolioProjects.append(
+        PortfolioProject(
           PortfolioId = Portlist[i]['Id'],
           ProjectId = j,
           AdjustedStartDate = datetime.strptime(BaselineStartDate[(j-1)%15], '%Y-%m-%d').date(),
           AdjustedPriority = j-1,
-          IsSelected = 1,
-        ))
+          IsSelected = select,
+        )
+      )
 
   db.session.add_all(PortfolioProjects)
   db.session.commit()
   print('PortfolioProjects Created!')
 
-  # Create a PortfolioProjectResource for each of the 3 
-  index = [
+  # Create a PortfolioProjectResource
+
+  box = [
     {
-      'pro1': 1,
-      'pro2': [2, 12],
-      'res1': [2, 3],
-      'res2': [3, 4],
-      'pro': 10,
-      'res': 1
+      'portPro': [1, 11],
+      'portRes': [1, 2]
     },
     {
-      'pro1': 12,
-      'pro2': [13, 33],
-      'res1': [7, 10],
-      'res2': [10, 13],
-      'pro': 20,
-      'res': 3
+      'portPro': [11, 21],
+      'portRes': [2, 3]
     },
     {
-      'pro1': 33,
-      'pro2': [34, 134],
-      'res1': [23, 33],
-      'res2': [33, 43],
-      'pro': 100,
-      'res': 10
+      'portPro': [21, 31],
+      'portRes': [3, 4]
+    },
+    {
+      'portPro': [31, 51],
+      'portRes': [4, 7]
+    },
+    {
+      'portPro': [51, 71],
+      'portRes': [7, 10]
+    },
+    {
+      'portPro': [71, 91],
+      'portRes': [10, 13]
+    },
+    {
+      'portPro': [91, 191],
+      'portRes': [13, 23]
+    },
+    {
+      'portPro': [191, 291],
+      'portRes': [23, 33]
+    },
+    {
+      'portPro': [291, 391],
+      'portRes': [33, 43]
     }
   ]
 
-  PortfolioProjectResources = [] 
-  box = 0
-  for item in index:
-    for j in range(item['res1'][0], item['res1'][1]):
-      PortfolioProjectResources.append(
-        PortfolioProjectResource(
-          PortfolioProjectId = item['pro1'],
-          PortfolioResourceId = j,
-          AdjustedDemand = json.dumps(BaselineDemand[box])
-        )
-      )
-    for j in range(item['pro2'][0], item['pro2'][1]):
-      for k in range(item['res2'][0], item['res2'][1]):
+  PortfolioProjectResources = []
+  for item in enumerate(box):
+    index, data = item
+
+    demandIndex = 0
+    if index >= 3:
+      demandIndex = 10
+    if index >= 6:
+      demandIndex = 70
+    for i in range(data['portPro'][0], data['portPro'][1]):
+      for j in range(data['portRes'][0], data['portRes'][1]):
         PortfolioProjectResources.append(
           PortfolioProjectResource(
-            PortfolioProjectId = j,
-            PortfolioResourceId = k,
-            AdjustedDemand = json.dumps(BaselineDemand[box])
+            PortfolioProjectId = i,
+            PortfolioResourceId = j,
+            AdjustedDemand = json.dumps(BaselineDemand[demandIndex])
           )
         )
-        box += 1
 
   db.session.add_all(PortfolioProjectResources)
   print('PortfolioProjectResources Created!')
