@@ -2,6 +2,10 @@ import { gql } from '@apollo/client';
 
 export const GET_CHART_DATA = gql`query ($portfolioId: ID!){
   portfolio(id: $portfolioId){
+    workspace{
+      AnchorDate
+      TimeInterval
+    }
     PortProjects{
       edges{
         node{
@@ -24,7 +28,6 @@ export const GET_CHART_DATA = gql`query ($portfolioId: ID!){
           AdjustedCapacity
           resource{
             Name
-            StartAt
           }
           PortProRes{
             edges{

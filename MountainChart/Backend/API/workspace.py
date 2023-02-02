@@ -8,7 +8,8 @@ from datetime import datetime
 class WorkspaceAttribute:
   TenantId = graphene.Int()
   Name = graphene.String()
-  StatusDate = graphene.Date()
+  AnchorDate = graphene.Date()
+  TimeInterval =graphene.String()
   Description = graphene.String()
   CreatedByUserId = graphene.Int()
   SharedUsers = graphene.String()
@@ -43,19 +44,21 @@ class UpdateWorkspace(Mutation):
   workspace = graphene.Field(lambda: Workspace)
 
   class Arguments:
-    input = UpdateWorkspaceInput(required=True)
+    input = UpdateWorkspaceInput(required=False)
 
   def mutate(self, info, input):
     data = input_to_dictionary(input)
 
     uworkspace = db.session.query(WorkspaceModel).filter_by(Id=data['Id']).first()
 
-    uworkspace.Name = data['Name']
-    uworkspace.TenantId = data['TenantId']
-    uworkspace.StatusDate = data['StatusDate']
-    uworkspace.Descritption = data['Description']
-    uworkspace.CreatedByUserId = data['CreatedByUserId']
-    uworkspace.SharedUsers = data['SharedUsers']
+    if 'Name' in data:
+      uworkspace.Name = data['Name']
+    if 'AnchorDate' in data: 
+      uworkspace.StatusDate = data['AnchorDate']
+    if 'Description' in data:
+      uworkspace.Descritption = data['Description']
+    if 'SharedUsers' in data:  
+      uworkspace.SharedUsers = data['SharedUsers']
 
     db.session.commit()
 

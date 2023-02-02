@@ -18,27 +18,34 @@ const ChartBody = (props) => {
   const [loading, setLoading] = useState(props.loading);
   const [capindex, setCapIndex] = useState({});
   const [capStartAt, setCapStartAt] = useState('');
+  const [timeInterval, SetTimeInterval] = useState('');
 
   const dataRef = useRef([]);
-  const markRef = useRef(null); 
+  const markRef = useRef(null);
   const xAxisRef = useRef([]);
   const yAxisRef = useRef(null);
   const bodyRef = useRef(null);
   const labelRef = useRef(null);
 
   const { chartId, stateChange } = props;
-  let { AxisXMax, AxisXMin, AxisYMax, AxisYInterval } = props.datasource;
+  let { 
+    AxisXMax, 
+    AxisXMin, 
+    AxisYMax, 
+    AxisYInterval 
+  } = props.datasource;
   let oldX, oldY, moveUpDown, mouseDown, selectedID, selectedIndex, selectedTag, selectedClass, method, state, lineDown, ctrlKey; 
   let timer;
 
   useEffect(() => {
     const { AxisXLabel, AxisYLabel, chartdata,} = props.datasource;
     if(chartdata) {
-      const { Capacity, Project, Demand } = chartdata;
+      const { Capacity, Project, Demand, TimeInterval, AnchorDate } = chartdata;
       setDisplayData(Demand);
       setCapacityData(Capacity['AdjustedCapacity']);
-      setCapStartAt(Capacity['startAt']);
+      setCapStartAt(AnchorDate);
       setCapIndex(Capacity['Id']);
+      SetTimeInterval(TimeInterval || 'Monthly');
       setProjectData(Project);
       setLabel({X:AxisXLabel, Y:AxisYLabel});
       setLoading(props.loading);
@@ -169,7 +176,6 @@ const ChartBody = (props) => {
       box.appendChild(node);
       return true;
     });
-  
   }
 
   const XItem = () => {

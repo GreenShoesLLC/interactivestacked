@@ -8,7 +8,6 @@ class MResourceAttribute:
   WorkspaceId = graphene.Int()
   Name = graphene.String()
   BaselineCapacity = graphene.String()
-  StartAt = graphene.Date()
   Tags = graphene.String()
 
 class MResource(SQLAlchemyObjectType):
@@ -56,8 +55,6 @@ class UpdateResource(Mutation):
       resource.Name = data['Name']
     if 'BaselineCapacity' in data:
       resource.BaselineCapacity = data['BaselineCapacity']
-    if 'StartAt' in data:
-      resource.StartAt = data['StartAt']
     if 'Tags' in data:
       resource.Tags = data['Tags']
 

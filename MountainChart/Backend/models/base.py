@@ -4,7 +4,7 @@ db = SQLAlchemy()
 
 class BaseModel:
   Id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-  Name = db.Column(db.Text, nullable=False, unique=True)
+  Name = db.Column(db.Text, nullable=False)
 
   def save(self):
     db.session.add(self)

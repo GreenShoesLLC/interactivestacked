@@ -27,7 +27,8 @@ class Workspace(db.Model, BaseModel):
   now = datetime.utcnow
 
   TenantId = db.Column(db.Integer, db.ForeignKey(Tenant.Id), nullable=False)
-  StatusDate = db.Column(db.Date, nullable=False, default=now)
+  AnchorDate = db.Column(db.Date, nullable=False, default=now)
+  TimeInterval = db.Column(db.String(20), nullable=False, default='Monthly')
   Description = db.Column(db.Text, nullable=True)
   CreatedByUserId = db.Column(db.Integer, db.ForeignKey(User.Id), nullable=False)
   CreatedAt = db.Column(db.DateTime, nullable=False, default=now)
@@ -53,7 +54,6 @@ class Resource(db.Model, BaseModel):
 
   WorkspaceId = db.Column(db.Integer, db.ForeignKey(Workspace.Id), nullable=False)
   BaselineCapacity = db.Column(db.Text)
-  StartAt = db.Column(db.Date, nullable=False)
   Tags = db.Column(db.String(20), nullable=False)
 
   workspace = db.relationship('Workspace', backref='resources')

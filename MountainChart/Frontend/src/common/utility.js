@@ -2,7 +2,7 @@ import moment from 'moment';
 
 export const convertChartData = (data, filter) => {
   if(!data || !data.portfolio) return;
-  const { PortProjects, PortResources } = data.portfolio;
+  const { PortProjects, PortResources, workspace } = data.portfolio;
   let Capacity = {};
   let Project = {};
   let Demand= [];
@@ -15,6 +15,8 @@ export const convertChartData = (data, filter) => {
     };
   }
 
+  let { TimeInterval, AnchorDate } = workspace;
+
   PortProjects.edges.map((row) => {
     let { Id, AdjustedStartDate, AdjustedPriority, project, IsSelected } = row.node;
     
@@ -22,7 +24,7 @@ export const convertChartData = (data, filter) => {
       let { Name, Color, StrokeColor } = project;
       Project[Name] = {
         Id,
-        start: moment(AdjustedStartDate).format('YYYY.MM'),
+        start: moment(AdjustedStartDate).format('YYYY.MM.DD'),
         priority: AdjustedPriority,
         color: Color,
         strokecolor: StrokeColor
@@ -32,13 +34,12 @@ export const convertChartData = (data, filter) => {
 
   PortResources.edges.map((row) => {
     let { Id, AdjustedCapacity, resource, PortProRes } = row.node;
-    let { Name, StartAt } = resource;
+    let { Name } = resource;
 
     if( Name === filter.resource ) {
       Capacity = {
         Id,
-        AdjustedCapacity: JSON.parse(AdjustedCapacity),
-        startAt: moment(StartAt).format('YYYY.MM')
+        AdjustedCapacity: JSON.parse(AdjustedCapacity)
       }
 
       PortProRes.edges.map((item) => {
@@ -58,38 +59,40 @@ export const convertChartData = (data, filter) => {
   return {
     Capacity,
     Project,
-    Demand
+    Demand,
+    TimeInterval,
+    AnchorDate: moment(AnchorDate).format('YYYY.MM.DD')
   };
 };
 
 export const convertSelectorData = (data) => {
   if(!data || !data.workspaceList) return;
   const { workspaceList } = data;
-  let all = {};
-  let worklist = [];
+  let workList = [];
+  let portList = {};
+  let resList = {};
 
   workspaceList.edges.map((row) => {
-    const { id, Name, portfolios, resources } = row.node;
-    let portfolio = [];
-    let resource = [];
+    let { id, Name, portfolios, resources } = row.node;
+    let workspaceId = id;
+    portList[workspaceId] = [];
+    resList[workspaceId] = [];
     
     portfolios.edges.map((item) => {
       const { id, Name } = item.node;
-      portfolio.push({id, Name});
+      portList[workspaceId].push({id, Name});
     });
     resources.edges.map((item1) => {
-      resource.push(item1.node.Name);
+      resList[workspaceId].push(item1.node.Name);
     });
 
-    worklist.push(Name);
-
-    all[Name] = { id, portfolio, resource };
-
+    workList.push({id, Name});
   });
 
   return {
-    worklist,
-    all
+    workList,
+    portList,
+    resList
   }
 }
 

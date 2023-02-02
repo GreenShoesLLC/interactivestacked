@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, Tag, Checkbox } from 'antd';
 import { useLazyQuery, useMutation } from '@apollo/client';
 
@@ -7,8 +7,13 @@ import { UPDATE_PORTFOLIOPROJECT_ISSELECTED } from 'store/actions/mutations/port
 import { convertTableData } from 'common/utility';
 
 const WorkspaceTable = ({ portfolioId, state, refetch }) => {
+
+  const [loading, setLoading] = useState(false);
   const [getData, { data }] = useLazyQuery(GET_TABLE_DATA, {
-    notifyOnNetworkStatusChange: true
+    notifyOnNetworkStatusChange: true,
+    onCompleted: () => {
+      setLoading(false);
+    }
   });
   const [IsSelectedProject] = useMutation(UPDATE_PORTFOLIOPROJECT_ISSELECTED, {
     notifyOnNetworkStatusChange: true,
@@ -23,6 +28,7 @@ const WorkspaceTable = ({ portfolioId, state, refetch }) => {
 
   useEffect(() => {
     if(portfolioId) {
+      setLoading(true);
       getData({variables: {portfolioId: portfolioId}});
     }
   }, [portfolioId, state]);
@@ -86,6 +92,7 @@ const WorkspaceTable = ({ portfolioId, state, refetch }) => {
       bordered={true}
       pagination={false}
       size="small"
+      loading={loading}
       style={{width:'90vw', marginLeft: '4vw'}}/>
   )
 }

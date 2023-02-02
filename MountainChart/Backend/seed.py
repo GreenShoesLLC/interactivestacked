@@ -21,7 +21,7 @@ with app.app_context():
   developer.save()
 
   # Add a new User to that Tenant
-  user = User( 
+  user = User(
     Name='Dan Hickman',
     Email = 'numeric0900@gmail.com',
     Password = password('QWE@#$asd234'),
@@ -36,21 +36,21 @@ with app.app_context():
     {
       'TenantId': 1,
       'Name':  'workspace1',
-      'StatusDate': '2025-05-01',
+      'AnchorDate': '2022-05-01',
       'Description': 'chart1',
       'CreatedByUserId': 1
     },
     {
       'TenantId': 1,
       'Name':  'workspace2',
-      'StatusDate': '2025-03-01',
+      'AnchorDate': '2022-03-01',
       'Description': 'chart2',
       'CreatedByUserId': 1
     },
     {
       'TenantId': 1,
       'Name':  'workspace3',
-      'StatusDate': '2025-04-01',
+      'AnchorDate': '2022-04-01',
       'Description': 'chart3',
       'CreatedByUserId': 1
     }
@@ -61,7 +61,7 @@ with app.app_context():
       Workspace(
         TenantId = workspacelist[i]['TenantId'],
         Name = workspacelist[i]['Name'],
-        StatusDate = datetime.strptime(workspacelist[i]['StatusDate'], '%Y-%m-%d').date(),
+        AnchorDate = datetime.strptime(workspacelist[i]['AnchorDate'], '%Y-%m-%d').date(),
         Description = workspacelist[i]['Description'],
         CreatedByUserId = workspacelist[i]['CreatedByUserId']
       )
@@ -88,7 +88,6 @@ with app.app_context():
         WorkspaceId = x,
         Name = Resources[i%4] + str(i),
         BaselineCapacity = json.dumps(BaselineCapacity[i]),
-        StartAt = datetime.strptime('2023-01-01', '%Y-%m-%d').date(),
         Tags = ''
       )
     )
@@ -100,7 +99,7 @@ with app.app_context():
   # Add 10 Projects to that Workspace
   BaselineStartDate = ['2023-01-01', '2024-03-01', '2023-05-01', '2023-07-01', '2023-09-01', '2024-11-01', '2024-01-01', '2024-04-01', '2024-06-01', '2024-08-01', '2024-10-01', '2025-01-01', '2025-02-01', '2025-03-01', '2025-04-01']
   Name = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-  Color = [{
+  Color = [{  
       "strokecolor": "#990000",
       "color": "#ff3333"
     },

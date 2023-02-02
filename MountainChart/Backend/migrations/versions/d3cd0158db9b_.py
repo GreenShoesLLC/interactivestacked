@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d6d5f7106735
+Revision ID: d3cd0158db9b
 Revises: 
-Create Date: 2022-12-30 11:50:46.100903
+Create Date: 2023-02-02 04:40:13.355457
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd6d5f7106735'
+revision = 'd3cd0158db9b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -41,7 +41,8 @@ def upgrade():
     sa.Column('Id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('Name', sa.Text(), nullable=False),
     sa.Column('TenantId', sa.Integer(), nullable=False),
-    sa.Column('StatusDate', sa.Date(), nullable=False),
+    sa.Column('AnchorDate', sa.Date(), nullable=False),
+    sa.Column('TimeInterval', sa.String(length=20), nullable=False),
     sa.Column('Description', sa.Text(), nullable=True),
     sa.Column('CreatedByUserId', sa.Integer(), nullable=False),
     sa.Column('CreatedAt', sa.DateTime(), nullable=False),
@@ -55,7 +56,7 @@ def upgrade():
     sa.Column('Id', sa.String(length=40), nullable=False),
     sa.Column('Name', sa.String(length=30), nullable=False),
     sa.Column('WorkspaceId', sa.Integer(), nullable=False),
-    sa.Column('StatusDate', sa.DateTime(), nullable=False),
+    sa.Column('StatusDate', sa.Date(), nullable=False),
     sa.Column('CreatedByUserId', sa.Integer(), nullable=False),
     sa.Column('LastModifiedByUserId', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['CreatedByUserId'], ['User.Id'], ),
@@ -67,8 +68,10 @@ def upgrade():
     sa.Column('Id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('Name', sa.Text(), nullable=False),
     sa.Column('WorkspaceId', sa.Integer(), nullable=False),
-    sa.Column('BaselineStartDate', sa.DateTime(), nullable=False),
+    sa.Column('BaselineStartDate', sa.Date(), nullable=False),
     sa.Column('BaselinePriority', sa.Integer(), nullable=True),
+    sa.Column('Color', sa.String(length=20), nullable=True),
+    sa.Column('StrokeColor', sa.String(length=20), nullable=True),
     sa.Column('Tags', sa.String(length=20), nullable=True),
     sa.ForeignKeyConstraint(['WorkspaceId'], ['Workspace.Id'], ),
     sa.PrimaryKeyConstraint('Id')
@@ -78,7 +81,7 @@ def upgrade():
     sa.Column('Name', sa.Text(), nullable=False),
     sa.Column('WorkspaceId', sa.Integer(), nullable=False),
     sa.Column('BaselineCapacity', sa.Text(), nullable=True),
-    sa.Column('StartAt', sa.DateTime(), nullable=False),
+    sa.Column('StartAt', sa.Date(), nullable=False),
     sa.Column('Tags', sa.String(length=20), nullable=False),
     sa.ForeignKeyConstraint(['WorkspaceId'], ['Workspace.Id'], ),
     sa.PrimaryKeyConstraint('Id')
@@ -88,7 +91,7 @@ def upgrade():
     sa.Column('PortfolioId', sa.String(length=40), nullable=False),
     sa.Column('ProjectId', sa.Integer(), nullable=False),
     sa.Column('IsSelected', sa.Boolean(), nullable=True),
-    sa.Column('AdjustedStartDate', sa.DateTime(), nullable=False),
+    sa.Column('AdjustedStartDate', sa.Date(), nullable=False),
     sa.Column('AdjustedPriority', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['PortfolioId'], ['Portfolio.Id'], ),
     sa.ForeignKeyConstraint(['ProjectId'], ['Project.Id'], ),
@@ -116,7 +119,7 @@ def upgrade():
     sa.Column('Id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('PortfolioProjectId', sa.Integer(), nullable=False),
     sa.Column('PortfolioResourceId', sa.Integer(), nullable=False),
-    sa.Column('AdjustDemand', sa.Text(), nullable=False),
+    sa.Column('AdjustedDemand', sa.Text(), nullable=False),
     sa.ForeignKeyConstraint(['PortfolioProjectId'], ['PortfolioProject.Id'], ),
     sa.ForeignKeyConstraint(['PortfolioResourceId'], ['PortfolioResource.Id'], ),
     sa.PrimaryKeyConstraint('Id')
