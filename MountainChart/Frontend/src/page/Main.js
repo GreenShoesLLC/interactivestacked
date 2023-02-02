@@ -16,6 +16,7 @@ const Main = () => {
 
   const [workspaceId, SetWorkspaceId] = useState('');
   const [filter, setFilter] = useState({});
+  const [state, SetState] = useState({});
 
   const [getData, { data, refetch }] = useLazyQuery(GET_CHART_DATA, {
     notifyOnNetworkStatusChange: true
@@ -74,12 +75,17 @@ const Main = () => {
       default:
         break;
     }
+    SetState(change);
   }
 
   return ( 
     <>
       <Selector stateChange = {onFilterChange}/>
-      <WorkspaceTable workspaceId={workspaceId} refetch={refetch}/>
+      <WorkspaceTable 
+        portfolioId={filter.portfolio} 
+        refetch={refetch} 
+        state={state}
+        />
       <MountainChart  
         title = {'MountainChart-1'}
         chartdata = {convertChartData(data, filter)}

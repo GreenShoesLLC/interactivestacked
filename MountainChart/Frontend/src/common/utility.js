@@ -94,31 +94,28 @@ export const convertSelectorData = (data) => {
 }
 
 export const convertTableData = (data) => {
-  if(!data || !data.workspace) return;
+  if(!data || !data.portfolio) return;
 
-  const { projects } = data.workspace;
+  const { PortProjects } = data.portfolio;
   let projectList = [];
-  projects.edges.map((row) => {
-    let { Name, BaselineStartDate, BaselinePriority, Color, StrokeColor, Tags, Projects } = row.node;
-    let child = Projects.edges.length;
-    let state = true;
-    Projects.edges.map((item) => {
-      let { Id, IsSelected, AdjustedPriority, AdjustedStartDate } = item.node;
-      projectList.push({
-        key: Id,
-        Name, 
-        BaselineStartDate: moment(BaselineStartDate).format('YYYY.MM'), 
-        BaselinePriority, 
-        Color, 
-        StrokeColor, 
-        Tags,
-        IsSelected,
-        AdjustedPriority,
-        AdjustedStartDate: moment(AdjustedStartDate).format('YYYY.MM'),
-        child: state && (child > 1) ? child : 0,
-        ... !state && (child > 1) ? {double:true} : ''
-      });
-      state = false;
+  let i = 0;
+
+  PortProjects.edges.map((row) => {
+    let { IsSelected, AdjustedPriority, AdjustedStartDate, project, Id } = row.node;
+    let { Name, BaselinePriority, BaselineStartDate, Color, StrokeColor, Tags } = project;
+    
+    projectList.push({
+      Id,
+      key: i++,
+      Name,
+      BaselinePriority,
+      BaselineStartDate,
+      IsSelected,
+      AdjustedPriority,
+      AdjustedStartDate,
+      Tags,
+      Color,
+      StrokeColor
     })
   });
 

@@ -45,3 +45,27 @@ export const GET_CHART_DATA = gql`query ($portfolioId: ID!){
     }
   }
 }`;
+
+export const GET_TABLE_DATA = gql`query ($portfolioId: ID!){
+  portfolio(id: $portfolioId){
+    PortProjects{
+      edges{
+        node{
+          Id
+          id
+          IsSelected
+          AdjustedPriority
+          AdjustedStartDate
+          project{
+            Name
+            BaselinePriority
+            BaselineStartDate
+            StrokeColor
+            Color
+            Tags
+          }
+        }
+      }
+    }
+  }
+}`;

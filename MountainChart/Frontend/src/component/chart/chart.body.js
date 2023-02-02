@@ -54,11 +54,11 @@ const ChartBody = (props) => {
     drawCapacityLine();
   }, [unit]);
 
-  if(dataRef.current.length !== (AxisXMax - AxisXMin + 1) * 10) {
-    dataRef.current = Array( (AxisXMax - AxisXMin + 1) * 10 )
+  if(dataRef.current.length !== (AxisXMax - AxisXMin + 1) * 12) {
+    dataRef.current = Array( (AxisXMax - AxisXMin + 1) * 12 )
       .fill()
       .map((_, i) => dataRef.current[i] || createRef());
-    xAxisRef.current = Array( (AxisXMax - AxisXMin + 1) * 10 )
+    xAxisRef.current = Array( (AxisXMax - AxisXMin + 1) * 12 )
       .fill()
       .map((_, i) => xAxisRef.current[i] || createRef());
   }
@@ -69,7 +69,7 @@ const ChartBody = (props) => {
       displayData.map((pro, i) => {
         const { start, strokecolor, color, priority } = projectData[pro.name];
         const [year, month] = start.split('.');
-        const startAt = (parseInt(year) - AxisXMin) * 10 + parseInt(month);
+        const startAt = (parseInt(year) - AxisXMin) * 12 + parseInt(month);
         pro.data.map((item, index) => {
           if(!dataRef.current[ startAt + index - 1]) { return false; }
           const box = dataRef.current[ startAt + index - 1];
@@ -107,7 +107,7 @@ const ChartBody = (props) => {
   const drawCapacityLine = () => {
     if(capacityData) {
       const [year, month] = capStartAt.split('.');
-      const startAt = (parseInt(year) - AxisXMin) * 10 + parseInt(month);
+      const startAt = (parseInt(year) - AxisXMin) * 12 + parseInt(month);
       
       capacityData.map((item, i) => {
         if(!dataRef.current[startAt + i - 1]) { return false; }
@@ -140,7 +140,7 @@ const ChartBody = (props) => {
       contentStart: xAxisRef.current[0].current.offsetLeft + bodyPadding,
       contentEnd: xAxisRef.current[xAxisRef.current.length-1].current.offsetLeft,
       dataHeight: xAxisRef.current[0].current.offsetHeight - markRef.current.offsetHeight,
-      max: (parseInt(AxisXMax) - parseInt(AxisXMin) + 1) * 10
+      max: (parseInt(AxisXMax) - parseInt(AxisXMin) + 1) * 12
     };
 
     const box = yAxisRef.current;
@@ -176,24 +176,37 @@ const ChartBody = (props) => {
     const start = parseInt(AxisXMin);
     const end = parseInt(AxisXMax);
     let x = [];
+    let now = new Date;
+
     for(let i = 0; i <= (end - start); i++){
-      for(let j = 0; j < 10; j++){
+      for(let j = 0; j < 12; j++){
+        
         x.push({
           year: i + start,
           month: j,
+          now: now.getFullYear() === (i + start) && now.getMonth() === j ? true : false
         });
       }
     }
 
-    return x.map((item, index) => (
-      <div className='xAxis' key = {index} ref = {xAxisRef.current[index]}>
-        <div id='mark' style = {{background: index%10 === 0 ? 'white' : 'rgb(217, 217, 217)'}} ref = {markRef}>
-          { index%10 === 0 ? item.year : index%10 + 1 }
+    return x.map((item, index) => {
+      let backgorund = index%12 === 0 ? 'white' : 'rgb(217, 217, 217)';
+      if(item.now)
+        backgorund = '#e65c00';
+      return (
+        <div 
+          className='xAxis' 
+          key = {index} 
+          ref = {xAxisRef.current[index]} 
+          style={{background: item.now ? '#ffe0cc' : '', border: item.now ? '1px solid #ffc299' : '1px solid #d4d4a7'}}>
+          <div id='mark' style = {{background: backgorund, color: item.now ? 'white' : 'black'}} ref = {markRef}>
+            { index%12 === 0 ? item.year : index%12 + 1 }
+          </div>
+          <div className = 'data' id={'t' + index} ref = {dataRef.current[index]}>
+          </div>
         </div>
-        <div className = 'data' id={'t' + index} ref = {dataRef.current[index]}>
-        </div>
-      </div>
-    ));
+      )
+    });
   };
 
   const onDemandChange = () => {
@@ -293,7 +306,7 @@ const ChartBody = (props) => {
       const at = Math.ceil(relx/(parseInt(unit.markWidth) + 2));
       const [i, j] = selectedID.split('-').slice(1);
       const [year, month] = projectData[displayData[i].name].start.split('.');
-      const start = (parseInt(year) - AxisXMin) * 10 + parseInt(month) - 1;
+      const start = (parseInt(year) - AxisXMin) * 12 + parseInt(month) - 1;
       const step = at - start - parseInt(j);
       const length = displayData[parseInt(i)].data.length;
 
@@ -340,10 +353,10 @@ const ChartBody = (props) => {
         }
         state = false;
 
-        const y = Math.floor( (start + step)/10 ) + AxisXMin;
-        const m = (start + step) % 10 === 0 ? 10 : (start + step) % 10;
+        const y = Math.floor( (start + step)/12 ) + AxisXMin;
+        const m = (start + step) % 12 === 0 ? 12 : (start + step) % 12;
         if(m < 0) {
-          projectData[displayData[i].name].start = `${y}.${10+m}`;
+          projectData[displayData[i].name].start = `${y}.${12+m}`;
         }
         else {
           projectData[displayData[i].name].start = `${y}.${m}`;

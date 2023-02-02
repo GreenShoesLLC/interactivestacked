@@ -25,7 +25,8 @@ const Selector = ({stateChange}) => {
       stateChange({
         id: workspace[selectedWork].id,
         resource: resourceRef.current.value, 
-        portfolio: portfolioRef.current.value
+        portfolio: portfolioRef.current.value,
+        
       });
     }
   }, [selectedWork]);
