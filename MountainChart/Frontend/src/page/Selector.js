@@ -5,7 +5,6 @@ import { Select } from 'antd';
 
 import { GET_SELECTOR_DATA } from 'store/actions/queries/workspace';
 import { convertSelectorData } from 'common/utility';
-import { StyledSelect } from 'component/UI/select';
 
 const { Option } = Select;
 
@@ -17,7 +16,6 @@ const Selector = ({stateChange}) => {
   const [selectedWork, setSelectedWork] = useState('');
   const [selectedPort, setSelectedPort] = useState('');
   const [selectedRes, setSelectedRes] = useState('');
-  const workspaceRef = useRef(null), portfolioRef = useRef(null), resourceRef = useRef(null);
 
   const { data } = useQuery(GET_SELECTOR_DATA, {
     notifyOnNetworkStatusChange: true,
@@ -59,7 +57,7 @@ const Selector = ({stateChange}) => {
 
   return (
     <div id = "selector">
-      <StyledSelect
+      <Select
         onChange={handleWorkspace}  
         value={selectedWork}>
         {
@@ -67,8 +65,8 @@ const Selector = ({stateChange}) => {
             <Option value={id} key={id}>{Name}</Option>
           ))
         }
-      </StyledSelect>
-      <StyledSelect
+      </Select>
+      <Select
         onChange={handlePortfolio} 
         value={selectedPort}>
         {
@@ -76,8 +74,8 @@ const Selector = ({stateChange}) => {
             <Option value={id} key={id}>{Name}</Option>
           ))
         }
-      </StyledSelect>
-      <StyledSelect
+      </Select>
+      <Select
         onChange={handleResource}
         value={selectedRes}>
         {
@@ -85,7 +83,7 @@ const Selector = ({stateChange}) => {
             <Option value={item} key={index}>{item}</Option>
           ))
         }
-      </StyledSelect>
+      </Select>
     </div>
   )
 }

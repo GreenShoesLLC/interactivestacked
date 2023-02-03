@@ -32,7 +32,7 @@ const ChartBody = (props) => {
     AxisXMax, 
     AxisXMin, 
     AxisYMax, 
-    AxisYInterval 
+    AxisYInterval
   } = props.datasource;
   let oldX, oldY, moveUpDown, mouseDown, selectedID, selectedIndex, selectedTag, selectedClass, method, state, lineDown, ctrlKey; 
   let timer;
@@ -41,11 +41,11 @@ const ChartBody = (props) => {
     const { AxisXLabel, AxisYLabel, chartdata,} = props.datasource;
     if(chartdata) {
       const { Capacity, Project, Demand, TimeInterval, AnchorDate } = chartdata;
+      SetTimeInterval(TimeInterval || 'Monthly');
       setDisplayData(Demand);
       setCapacityData(Capacity['AdjustedCapacity']);
       setCapStartAt(AnchorDate);
       setCapIndex(Capacity['Id']);
-      SetTimeInterval(TimeInterval || 'Monthly');
       setProjectData(Project);
       setLabel({X:AxisXLabel, Y:AxisYLabel});
       setLoading(props.loading);
@@ -53,6 +53,7 @@ const ChartBody = (props) => {
   }, [props]);
   
   useEffect(()=> {
+    if(timeInterval!=='')
     drawYaxis();
   }, [projectData, capacityData]);
 
@@ -61,22 +62,25 @@ const ChartBody = (props) => {
     drawCapacityLine();
   }, [unit]);
 
-  if(dataRef.current.length !== (AxisXMax - AxisXMin + 1) * 12) {
-    dataRef.current = Array( (AxisXMax - AxisXMin + 1) * 12 )
-      .fill()
-      .map((_, i) => dataRef.current[i] || createRef());
-    xAxisRef.current = Array( (AxisXMax - AxisXMin + 1) * 12 )
-      .fill()
-      .map((_, i) => xAxisRef.current[i] || createRef());
-  }
-
   //init functions
   const draw = () => {
     if(displayData) {
       displayData.map((pro, i) => {
         const { start, strokecolor, color, priority } = projectData[pro.name];
-        const [year, month] = start.split('.');
-        const startAt = (parseInt(year) - AxisXMin) * 12 + parseInt(month);
+        let startAt;
+
+        switch(timeInterval) {
+          case 'Monthly':
+            let [year, month] = start.split('.');
+            let star = new Date(AxisXMin);
+            startAt = (parseInt(year) - star.getFullYear()) * 12 + parseInt(month);
+            break;
+          case 'Yearly':
+            break;
+          case 'Daily':
+            break;
+        }
+
         pro.data.map((item, index) => {
           if(!dataRef.current[ startAt + index - 1]) { return false; }
           const box = dataRef.current[ startAt + index - 1];
@@ -103,7 +107,6 @@ const ChartBody = (props) => {
           if(s) {
             box.current.appendChild(node);
           }
-
           return true;
         })
         return true;
@@ -113,8 +116,19 @@ const ChartBody = (props) => {
   
   const drawCapacityLine = () => {
     if(capacityData) {
-      const [year, month] = capStartAt.split('.');
-      const startAt = (parseInt(year) - AxisXMin) * 12 + parseInt(month);
+      let startAt;
+
+      switch(timeInterval) {
+        case 'Monthly':
+          const [year, month] = capStartAt.split('.');
+          let start = new Date(AxisXMin);
+          startAt = (parseInt(year) - start.getFullYear()) * 12 + parseInt(month);
+          break;
+        case 'Yearly':
+          break;
+        case 'Daily':
+          break;
+      }
       
       capacityData.map((item, i) => {
         if(!dataRef.current[startAt + i - 1]) { return false; }
@@ -131,23 +145,28 @@ const ChartBody = (props) => {
   }
 
   const drawYaxis = ()  => {
-    if(!AxisYMax && displayData) {
-      let max = 0;
-      displayData.map((item) => {
-        max += Math.max(...item.data);
-        return true;
-      });
-      AxisYMax = max/3;
-    }
 
     const bodyPadding = parseInt(getComputedStyle(bodyRef.current).paddingLeft || 0);
+
+    var timeMax;
+    var end = moment(new Date(AxisXMax));
+    var start = moment(new Date(AxisXMin));
+
+    switch(timeInterval) {
+      case 'Monthly':
+        timeMax = end.diff(start, 'months');
+        break;
+      case 'Yearly':
+        timeMax = end.diff(start, 'years') >= 20 ? end.diff(start, 'years') : 20 ;
+        break;
+    }
 
     let tmpUnit = {
       markWidth: markRef.current.offsetWidth,
       contentStart: xAxisRef.current[0].current.offsetLeft + bodyPadding,
       contentEnd: xAxisRef.current[xAxisRef.current.length-1].current.offsetLeft,
       dataHeight: xAxisRef.current[0].current.offsetHeight - markRef.current.offsetHeight,
-      max: (parseInt(AxisXMax) - parseInt(AxisXMin) + 1) * 12
+      max: timeMax
     };
 
     const box = yAxisRef.current;
@@ -178,41 +197,136 @@ const ChartBody = (props) => {
     });
   }
 
-  const XItem = () => {
-    const start = parseInt(AxisXMin);
-    const end = parseInt(AxisXMax);
-    let x = [];
-    let now = new Date;
+  const declareXItem = () => {
+    var Max;
+    var end = moment(new Date(AxisXMax));
+    var start = moment(new Date(AxisXMin));
 
-    for(let i = 0; i <= (end - start); i++){
-      for(let j = 0; j < 12; j++){
-        
-        x.push({
-          year: i + start,
-          month: j,
-          now: now.getFullYear() === (i + start) && now.getMonth() === j ? true : false
-        });
-      }
+    switch(timeInterval) {
+      case 'Monthly':
+        Max = end.diff(start, 'months');
+        break;
+      case 'Yearly':
+        Max = end.diff(start, 'years') >= 20 ? end.diff(start, 'years') : 20 ;
+        break;
+      case 'Daily':
+        Max = end.diff(start, 'days');
     }
 
-    return x.map((item, index) => {
-      let backgorund = index%12 === 0 ? 'white' : 'rgb(217, 217, 217)';
-      if(item.now)
-        backgorund = '#e65c00';
-      return (
-        <div 
-          className='xAxis' 
-          key = {index} 
-          ref = {xAxisRef.current[index]} 
-          style={{background: item.now ? '#ffe0cc' : '', border: item.now ? '1px solid #ffc299' : '1px solid #d4d4a7'}}>
-          <div id='mark' style = {{background: backgorund, color: item.now ? 'white' : 'black'}} ref = {markRef}>
-            { index%12 === 0 ? item.year : index%12 + 1 }
+    if(dataRef.current.length !== Max) {
+      dataRef.current = Array( Max )
+        .fill()
+        .map((_, i) => dataRef.current[i] || createRef());
+      xAxisRef.current = Array( Max )
+        .fill()
+        .map((_, i) => xAxisRef.current[i] || createRef());
+    }
+
+    return Max;
+  }
+
+  const XItem = () => {
+    if(timeInterval!==''){
+      let Max = declareXItem();
+
+      if(!AxisYMax && displayData) {
+        let max = 0;
+        displayData.map((item) => {
+          max += Math.max(...item.data);
+          return true;
+        });
+        AxisYMax = max/3;
+      }
+
+      let x = [];
+      let now = new Date;
+
+      switch(timeInterval) {
+        case 'Monthly': {
+          let start  = new Date(AxisXMin);
+          let i = 0;
+          do{
+            x.push({
+              year: start.getFullYear(),
+              month: start.getMonth(),
+              now: (now.getMonth() === start.getMonth()) && (start.getFullYear() === now.getFullYear()) ? true : false
+            })
+            start.setMonth(start.getMonth() + 1);
+            i++;
+          }while(i < Max);
+          break;
+        }
+        case 'Yearly': {
+          let [start] = AxisXMin.split('.');
+          for (let i = 0; i < Max; i++) {
+            x.push({
+              year: i + parseInt(start),
+              now: now.getFullYear() === (i + parseInt(start)) ? true : false
+            })
+          }
+          break;
+        }
+        case 'Daily': {
+          let start = new Date(AxisXMin);
+          let i = 0;
+          do{
+            x.push({
+              year: start.getFullYear(),
+              month: start.getMonth(),
+              day: start.getDate(),
+              now: moment(start).format('YYYY.MM.DD') === moment(now).format('YYYY.MM.DD')
+            })
+            start.setDate(start.getDate() + 1);
+            i++;
+          }while(i<Max);
+          break; 
+        }
+      }
+
+      return x.map((item, index) => {
+        let background;
+        switch(timeInterval) {
+          case 'Monthly':
+            background = index%12 === 0 ? 'white' : 'rgb(217, 217, 217)';
+            break;
+          case 'Yearly':
+            background = 'white';
+            break;
+          case 'Daily':
+            background = item.day === 1 ? 'white' : 'rgb(217, 217, 217)';
+        }
+
+        if(item.now) 
+          background = '#e65c00';
+
+        return (
+          <div
+            className='xAxis' 
+            key = {index} 
+            ref = {xAxisRef.current[index]} 
+            style={{background: item.now ? '#ffe0cc' : '', border: item.now ? '1px solid #ffc299' : '1px solid #d4d4a7'}}
+            >
+            <div 
+              id='mark' 
+              ref = {markRef}
+              style = {{background: background, color: item.now ? 'white' : 'black'}} 
+              >
+              { timeInterval === 'Monthly' ? 
+                  (item.month === 0 ? item.year : item.month + 1) 
+                  : timeInterval === 'Yearly' ? item.year 
+                    : item.day === 1 ? `${item.month + 1}.${item.day}` : item.day }
+            </div>
+            <div 
+              className = 'data' 
+              id={'t' + index} 
+              ref = {dataRef.current[index]}>
+            </div>
           </div>
-          <div className = 'data' id={'t' + index} ref = {dataRef.current[index]}>
-          </div>
-        </div>
-      )
-    });
+        )
+      });
+    } else{
+      return '';
+    }
   };
 
   const onDemandChange = () => {
@@ -309,14 +423,26 @@ const ChartBody = (props) => {
     if(method === 0 && state && selectedID) {
       const scrollX = document.getElementById(`content${chartId}`).scrollLeft;
       const relx = e.pageX + scrollX - unit.contentStart - 1;
-      const at = Math.ceil(relx/(parseInt(unit.markWidth) + 2));
+      const at = Math.ceil(relx/(parseInt(unit.markWidth) + 2))
       const [i, j] = selectedID.split('-').slice(1);
       const [year, month] = projectData[displayData[i].name].start.split('.');
-      const start = (parseInt(year) - AxisXMin) * 12 + parseInt(month) - 1;
+      let start;
+      let xMin = new Date(AxisXMin);
+
+      switch(timeInterval) {
+        case 'Monthly':
+          start = (parseInt(year) - xMin.getFullYear()) * 12 + parseInt(month) - 1;
+          break;
+        case 'Yearly':
+          break;
+        case 'Daily':
+          break;
+      }
+
       const step = at - start - parseInt(j);
       const length = displayData[parseInt(i)].data.length;
 
-      if(isBoundary(start + step, start + (length -1) + step) && (parseInt(year) >= AxisXMin)) { return false; }
+      if(isBoundary(start + step, start + (length -1) + step) && (parseInt(year) >= xMin.getFullYear())) { return false; }
 
       if((step-1) !== 0) {
         const color = projectData[displayData[i].name].color;
@@ -358,8 +484,8 @@ const ChartBody = (props) => {
           }
         }
         state = false;
-
-        const y = Math.floor( (start + step)/12 ) + AxisXMin;
+        let xMin = new Date(AxisXMin);
+        const y = Math.floor( (start + step)/12 ) + xMin.getFullYear();
         const m = (start + step) % 12 === 0 ? 12 : (start + step) % 12;
         if(m < 0) {
           projectData[displayData[i].name].start = `${y}.${12+m}`;

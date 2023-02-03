@@ -18,7 +18,7 @@ class User(db.Model, BaseModel):
   CreatedAt = db.Column(db.DateTime, nullable=False, default=now)
   UpdatedAt = db.Column(db.DateTime, nullable=False, default=now, onupdate=now)
   Deleted = db.Column(db.Boolean, default=0)
-  AccountTypeId = db.Column(db.String(30))
+  AccountTypeId = db.Column(db.String(30))    
 
 class Workspace(db.Model, BaseModel):
   

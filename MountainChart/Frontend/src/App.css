@@ -17,20 +17,10 @@ body{
 }
 
 #selector {
-  display: block;
-  padding-block: 10px;
-}
-
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  color: green;
-}
-
-li {
-  display: inline-block;
+  display:flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 10px;
 }
 
 /* width */
@@ -48,23 +38,4 @@ li {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #555; 
-}
-
-select {
-  appearance: none;
-  background-color: transparent;
-  border: none;
-  padding-inline: 10px;
-  margin: 0;
-  width: 100%;
-  font-family: inherit;
-  font-size: 20px;
-  cursor: pointer;
-  line-height: inherit;
-  color: green;
-  outline: none;
-}
-
-select::-ms-expand {
-  display: none;
 }
