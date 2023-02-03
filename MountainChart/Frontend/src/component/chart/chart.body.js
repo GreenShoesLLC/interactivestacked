@@ -68,15 +68,19 @@ const ChartBody = (props) => {
       displayData.map((pro, i) => {
         const { start, strokecolor, color, priority } = projectData[pro.name];
         let startAt;
+        let star = new Date(AxisXMin);
 
         switch(timeInterval) {
-          case 'Monthly':
+          case 'Monthly': {
             let [year, month] = start.split('.');
-            let star = new Date(AxisXMin);
             startAt = (parseInt(year) - star.getFullYear()) * 12 + parseInt(month);
             break;
-          case 'Yearly':
+          }
+          case 'Yearly': {
+            let [year] = start.split('.');
+            startAt = parseInt(year) - star.getFullYear() + 1;
             break;
+          }
           case 'Daily':
             break;
         }
@@ -117,15 +121,19 @@ const ChartBody = (props) => {
   const drawCapacityLine = () => {
     if(capacityData) {
       let startAt;
+      let start = new Date(AxisXMin);
 
       switch(timeInterval) {
-        case 'Monthly':
-          const [year, month] = capStartAt.split('.');
-          let start = new Date(AxisXMin);
+        case 'Monthly': {
+          let [year, month] = capStartAt.split('.');
           startAt = (parseInt(year) - start.getFullYear()) * 12 + parseInt(month);
           break;
-        case 'Yearly':
+        }
+        case 'Yearly': {
+          let [year] = capStartAt.split('.');
+          startAt = parseInt(year) - start.getFullYear();
           break;
+        }
         case 'Daily':
           break;
       }
@@ -287,10 +295,10 @@ const ChartBody = (props) => {
         let background;
         switch(timeInterval) {
           case 'Monthly':
-            background = index%12 === 0 ? 'white' : 'rgb(217, 217, 217)';
+            background = index % 12 === 0 ? 'white' : 'rgb(217, 217, 217)';
             break;
           case 'Yearly':
-            background = 'white';
+            background = item.year % 5 === 0 ? 'white' : 'rgb(217, 217, 217)';
             break;
           case 'Daily':
             background = item.day === 1 ? 'white' : 'rgb(217, 217, 217)';
@@ -434,6 +442,7 @@ const ChartBody = (props) => {
           start = (parseInt(year) - xMin.getFullYear()) * 12 + parseInt(month) - 1;
           break;
         case 'Yearly':
+          start = parseInt(year) - xMin.getFullYear();
           break;
         case 'Daily':
           break;
@@ -485,13 +494,28 @@ const ChartBody = (props) => {
         }
         state = false;
         let xMin = new Date(AxisXMin);
-        const y = Math.floor( (start + step)/12 ) + xMin.getFullYear();
-        const m = (start + step) % 12 === 0 ? 12 : (start + step) % 12;
-        if(m < 0) {
-          projectData[displayData[i].name].start = `${y}.${12+m}`;
-        }
-        else {
-          projectData[displayData[i].name].start = `${y}.${m}`;
+
+        switch(timeInterval) {
+          case 'Monthly': {
+            const y = Math.floor( (start + step)/12 ) + xMin.getFullYear();
+            const m = (start + step) % 12 === 0 ? 12 : (start + step) % 12;
+            if(m < 0) {
+              projectData[displayData[i].name].start = `${y}.${12+m}`;
+            }
+            else {
+              projectData[displayData[i].name].start = `${y}.${m}`;
+            }
+            break;
+          }
+          case 'Yearly': {
+            const y = start + step + xMin.getFullYear() - 1;
+            let [year, month, day] = projectData[displayData[i].name].start.split('.');
+            projectData[displayData[i].name].start = `${y}.${month}.${day}`;
+            break;
+          }
+          case 'Daily': {
+            break;
+          }
         }
       }
       else {
@@ -676,8 +700,8 @@ const ChartBody = (props) => {
     <>
       <div className="body" ref={bodyRef}>
         <div className="label label-y" ref={labelRef}>
-          { 
-            label.Y?<nav>{label.Y}</nav>:''
+          {
+            label.Y ? <nav>{label.Y}</nav> : ''
           }
         </div>
         <div>{label.x}</div>
@@ -689,7 +713,7 @@ const ChartBody = (props) => {
           onMouseOut={handle}
           onMouseDown={handle}>
           {
-            loading?(
+            loading ? (
               <div className="spinner"></div>
             ) : (
               <XItem />
@@ -698,7 +722,7 @@ const ChartBody = (props) => {
         </div>
       </div>
       {
-          label.X?<div className="label label-x"><nav>{label.X}</nav></div>:''
+          label.X ? <div className="label label-x"><nav>{label.X}</nav></div> : ''
       }
       
     </>

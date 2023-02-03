@@ -177,7 +177,7 @@ with app.app_context():
       t = 15
     for j in range(s, t):
       x = []
-      for y in range(15):
+      for y in range(random.randrange(2, 15)):
         x.append(random.randrange(1, 6))
       BaselineDemand.append(x)
       ProjectResources.append(
