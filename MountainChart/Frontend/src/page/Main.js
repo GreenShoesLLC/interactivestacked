@@ -88,7 +88,7 @@ const Main = () => {
         />
       <MountainChart  
         title = {'MountainChart-1'}
-        chartdata = {convertChartData(data, filter)}
+        chartData = {convertChartData(data, filter)}
         AxisXMin = {'2022.01.01'}
         AxisXMax = {'2026.01.01'}
         AxisXLabel = {'Time'}
@@ -97,16 +97,16 @@ const Main = () => {
         AxisYInterval = {5}
         stateChange = {onSourceChange}
         />
-      {/* <MountainChart
+      <MountainChart
         title = {'MountainChart-2'}
-        chartdata = {convertChartData(data, filter)}
-        AxisXMin = {2023}
-        AxisXMax = {2026}
+        chartData = {convertChartData(data, filter)}
+        AxisXMin = {'2023.01.01'}
+        AxisXMax = {'2027.01.01'}
         AxisXLabel = {'year/month'}
         AxisYMax = {40}
         AxisYInterval = {5}
         stateChange = {onSourceChange}
-        /> */}
+        />
     </>
   )
 }

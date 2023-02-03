@@ -33,14 +33,27 @@ const ChartBody = (props) => {
     AxisXMin, 
     AxisYMax, 
     AxisYInterval
-  } = props.datasource;
-  let oldX, oldY, moveUpDown, mouseDown, selectedID, selectedIndex, selectedTag, selectedClass, method, state, lineDown, ctrlKey; 
-  let timer;
+  } = props.dataSource;
+  let oldX, oldY;
+  let moveUpDown, mouseDown;
+  let selectedID, selectedIndex, selectedTag, selectedClass;
+  let timer, method, state, lineDown, ctrlKey; 
 
   useEffect(() => {
-    const { AxisXLabel, AxisYLabel, chartdata,} = props.datasource;
-    if(chartdata) {
-      const { Capacity, Project, Demand, TimeInterval, AnchorDate } = chartdata;
+    const { 
+      AxisXLabel, 
+      AxisYLabel, 
+      chartData
+    } = props.dataSource;
+    if(chartData) {
+      const { 
+        Capacity, 
+        Project, 
+        Demand, 
+        TimeInterval, 
+        AnchorDate 
+      } = chartData;
+
       SetTimeInterval(TimeInterval || 'Monthly');
       setDisplayData(Demand);
       setCapacityData(Capacity['AdjustedCapacity']);
@@ -53,8 +66,7 @@ const ChartBody = (props) => {
   }, [props]);
   
   useEffect(()=> {
-    if(timeInterval!=='')
-    drawYaxis();
+    if(timeInterval!=='') drawYaxis();
   }, [projectData, capacityData]);
 
   useEffect(() => {
@@ -66,7 +78,12 @@ const ChartBody = (props) => {
   const draw = () => {
     if(displayData) {
       displayData.map((pro, i) => {
-        const { start, strokecolor, color, priority } = projectData[pro.name];
+        const { 
+          start, 
+          strokecolor, 
+          color, 
+          priority 
+        } = projectData[pro.name];
         let startAt;
         let star = new Date(AxisXMin);
 
@@ -82,6 +99,9 @@ const ChartBody = (props) => {
             break;
           }
           case 'Daily':
+            star = moment(star);
+            let end = moment(new Date(start));
+            startAt = end.diff(star, 'days') + 1;
             break;
         }
 
@@ -89,6 +109,7 @@ const ChartBody = (props) => {
           if(!dataRef.current[ startAt + index - 1]) { return false; }
           const box = dataRef.current[ startAt + index - 1];
           const node = document.createElement('span');
+
           node.innerText = `${pro.name}(${Math.round(item)})`;
           node.id = `${chartId}-${i}-${index}`;
           node.className = 'con';
@@ -97,11 +118,12 @@ const ChartBody = (props) => {
             border-top: 1px solid ${strokecolor};height:${item*unit.itemHeightUnit}px`;
           
           const children = box.current.children;
-
           let s = true;
+
           for(let j = 0; j < children.length; j++) {
             const index = children[j].id.split('-')[1];
             let slibingPriority = projectData[displayData[index].name].priority;
+            
             if(priority < slibingPriority) {
               box.current.insertBefore(node, children[j]);
               s = false;
@@ -135,6 +157,9 @@ const ChartBody = (props) => {
           break;
         }
         case 'Daily':
+          start = moment(start);
+          let end = moment(new Date(capStartAt));
+          startAt = end.diff(start, 'days') + 1;
           break;
       }
       
@@ -142,11 +167,13 @@ const ChartBody = (props) => {
         if(!dataRef.current[startAt + i - 1]) { return false; }
         const box = dataRef.current[startAt + i - 1];
         const node = document.createElement('div');
+        
         node.classList.add('capacityLine');
         node.id = `${chartId}-${i}`;
         node.style.cssText = 
           `width: ${unit.markWidth}px;top:${unit.dataHeight - item * unit.itemHeightUnit}px`;
         box.current.appendChild(node);
+        
         return true;
       });
     }
@@ -198,9 +225,11 @@ const ChartBody = (props) => {
 
     m.map((item) => {
       const node = document.createElement('div');
+      
       node.innerText = item;
       node.style.cssText = `height:${height}px`;
       box.appendChild(node);
+      
       return true;
     });
   }
@@ -239,6 +268,7 @@ const ChartBody = (props) => {
 
       if(!AxisYMax && displayData) {
         let max = 0;
+        
         displayData.map((item) => {
           max += Math.max(...item.data);
           return true;
@@ -247,12 +277,13 @@ const ChartBody = (props) => {
       }
 
       let x = [];
-      let now = new Date;
+      let now = new Date();
 
       switch(timeInterval) {
         case 'Monthly': {
           let start  = new Date(AxisXMin);
           let i = 0;
+          
           do{
             x.push({
               year: start.getFullYear(),
@@ -266,6 +297,7 @@ const ChartBody = (props) => {
         }
         case 'Yearly': {
           let [start] = AxisXMin.split('.');
+          
           for (let i = 0; i < Max; i++) {
             x.push({
               year: i + parseInt(start),
@@ -277,11 +309,13 @@ const ChartBody = (props) => {
         case 'Daily': {
           let start = new Date(AxisXMin);
           let i = 0;
+          
           do{
             x.push({
               year: start.getFullYear(),
               month: start.getMonth(),
               day: start.getDate(),
+              weekDay: start.getDay(),
               now: moment(start).format('YYYY.MM.DD') === moment(now).format('YYYY.MM.DD')
             })
             start.setDate(start.getDate() + 1);
@@ -293,26 +327,47 @@ const ChartBody = (props) => {
 
       return x.map((item, index) => {
         let background;
+        let border = '1px solid #d4d4a7'; 
+        let anchor;
+        var anchorD = new Date(capStartAt);
+
         switch(timeInterval) {
           case 'Monthly':
+            anchor = (anchorD.getMonth() === item.month) && (anchorD.getFullYear() === item.year);
             background = index % 12 === 0 ? 'white' : 'rgb(217, 217, 217)';
             break;
           case 'Yearly':
+            anchor = anchorD.getFullYear() === item.year;
             background = item.year % 5 === 0 ? 'white' : 'rgb(217, 217, 217)';
             break;
           case 'Daily':
+            let current = new Date(`${item.year}.${item.month+1}.${item.day}`);
+            anchor = (anchorD - current) === 0 ? true : false;
             background = item.day === 1 ? 'white' : 'rgb(217, 217, 217)';
+            border = '';
         }
 
-        if(item.now) 
+
+        if(item.now) {
           background = '#e65c00';
+          border = '1px solid #ffc299';
+        }
+
+        let month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
         return (
           <div
             className='xAxis' 
             key = {index} 
             ref = {xAxisRef.current[index]} 
-            style={{background: item.now ? '#ffe0cc' : '', border: item.now ? '1px solid #ffc299' : '1px solid #d4d4a7'}}
+            style={{
+              background: item.now ? '#ffe0cc' : '', 
+              border: timeInterval === 'Daily' ? 'none' : border, 
+              borderLeft: anchor ? 
+                '1px solid red' : item.weekDay === undefined ? 
+                  border : (item.weekDay === 0 ? '2px solid #d4d4a7' : (item.now ? '1px solid #ffc299' : '')),
+              borderRight: border
+            }}
             >
             <div 
               id='mark' 
@@ -322,7 +377,7 @@ const ChartBody = (props) => {
               { timeInterval === 'Monthly' ? 
                   (item.month === 0 ? item.year : item.month + 1) 
                   : timeInterval === 'Yearly' ? item.year 
-                    : item.day === 1 ? `${item.month + 1}.${item.day}` : item.day }
+                    : item.day === 1 ? `${month[item.month]}` : item.day }
             </div>
             <div 
               className = 'data' 
@@ -344,6 +399,7 @@ const ChartBody = (props) => {
       } 
       if(method === 0) {
         let tmpData = [];
+        
         Object.keys(projectData).map((key) => {
           let { Id, priority, start } = projectData[key];
           tmpData.push({
@@ -392,6 +448,7 @@ const ChartBody = (props) => {
       const i = selectedID.split('-')[1];
       for(let j = ctrlKey ? 0 : i; j < capacityData.length; j++) {
         let element = document.getElementById(`${chartId}-${j}`);
+        
         if(!element) continue;
         element.style.border = state ? '1px solid #0000cc' : '1px dashed #cc0000';
       }
@@ -431,7 +488,7 @@ const ChartBody = (props) => {
     if(method === 0 && state && selectedID) {
       const scrollX = document.getElementById(`content${chartId}`).scrollLeft;
       const relx = e.pageX + scrollX - unit.contentStart - 1;
-      const at = Math.ceil(relx/(parseInt(unit.markWidth) + 2))
+      const at = Math.ceil(relx/(parseInt(unit.markWidth) + 0.3))
       const [i, j] = selectedID.split('-').slice(1);
       const [year, month] = projectData[displayData[i].name].start.split('.');
       let start;
@@ -445,6 +502,9 @@ const ChartBody = (props) => {
           start = parseInt(year) - xMin.getFullYear();
           break;
         case 'Daily':
+          let startDate = moment(new Date(projectData[displayData[i].name].start));
+          let minDate = moment(xMin);
+          start = startDate.diff(minDate, 'days') + 1;
           break;
       }
 
@@ -493,27 +553,22 @@ const ChartBody = (props) => {
           }
         }
         state = false;
-        let xMin = new Date(AxisXMin);
+        var nowDate = new Date(projectData[displayData[i].name].start);
 
         switch(timeInterval) {
           case 'Monthly': {
-            const y = Math.floor( (start + step)/12 ) + xMin.getFullYear();
-            const m = (start + step) % 12 === 0 ? 12 : (start + step) % 12;
-            if(m < 0) {
-              projectData[displayData[i].name].start = `${y}.${12+m}`;
-            }
-            else {
-              projectData[displayData[i].name].start = `${y}.${m}`;
-            }
+            let newDate = nowDate.setMonth(nowDate.getMonth() + step - 1);
+            projectData[displayData[i].name].start = moment(newDate).format('YYYY.MM.DD');
             break;
           }
           case 'Yearly': {
-            const y = start + step + xMin.getFullYear() - 1;
-            let [year, month, day] = projectData[displayData[i].name].start.split('.');
-            projectData[displayData[i].name].start = `${y}.${month}.${day}`;
+            let newDate = nowDate.setFullYear(nowDate.getFullYear() + step - 1);
+            projectData[displayData[i].name].start = moment(newDate).format('YYYY.MM.DD');
             break;
           }
           case 'Daily': {
+            let newDate = nowDate.setDate(nowDate.getDate() + step - 1);
+            projectData[displayData[i].name].start = moment(newDate).format('YYYY.MM.DD');
             break;
           }
         }

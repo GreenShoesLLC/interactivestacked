@@ -13,7 +13,7 @@ const MountainChart = (props) => {
         <CHeader Name={props.title} />
         <CBody
           chartId={Id}
-          datasource={props}
+          dataSource={props}
           loading={props.loading}
           stateChange={props.stateChange}/>
       </div>

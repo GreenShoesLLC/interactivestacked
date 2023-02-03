@@ -38,19 +38,22 @@ with app.app_context():
       'Name':  'workspace1',
       'AnchorDate': '2022-05-01',
       'Description': 'chart1',
+      'TimeInterval': 'Monthly',
       'CreatedByUserId': 1
     },
     {
       'TenantId': 1,
       'Name':  'workspace2',
-      'AnchorDate': '2022-03-01',
+      'AnchorDate': '2023-01-01',
       'Description': 'chart2',
+      'TimeInterval': 'Yearly',
       'CreatedByUserId': 1
     },
     {
       'TenantId': 1,
       'Name':  'workspace3',
       'AnchorDate': '2022-04-01',
+      'TimeInterval': 'Daily',
       'Description': 'chart3',
       'CreatedByUserId': 1
     }
@@ -62,6 +65,7 @@ with app.app_context():
         TenantId = workspacelist[i]['TenantId'],
         Name = workspacelist[i]['Name'],
         AnchorDate = datetime.strptime(workspacelist[i]['AnchorDate'], '%Y-%m-%d').date(),
+        TimeInterval = workspacelist[i]['TimeInterval'],
         Description = workspacelist[i]['Description'],
         CreatedByUserId = workspacelist[i]['CreatedByUserId']
       )
