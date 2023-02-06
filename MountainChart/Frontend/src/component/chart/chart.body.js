@@ -37,6 +37,7 @@ const ChartBody = (props) => {
   let oldX, oldY;
   let moveUpDown, mouseDown;
   let selectedID, selectedIndex, selectedTag, selectedClass;
+  let draggleID, draggleClass, draggleTag;
   let timer, method, state, lineDown, ctrlKey; 
 
   useEffect(() => {
@@ -359,6 +360,7 @@ const ChartBody = (props) => {
           <div
             className='xAxis' 
             key = {index} 
+            id = {`xAxis-${index}`}
             ref = {xAxisRef.current[index]} 
             style={{
               background: item.now ? '#ffe0cc' : '', 
@@ -419,6 +421,17 @@ const ChartBody = (props) => {
     }
   }
 
+  const getSelectedColumnIndex = () => {
+    if(draggleTag === 'SPAN') {
+      let box = document.getElementById(draggleID).parentNode.id;
+      return box.slice(1);
+    }
+
+    if(draggleClass === 'xAxis') {
+      return draggleID.split('-')[1];
+    }
+  }
+
   //draggle Functions
   const draggleMethod = (e) => {
     oldX = e.pageX;
@@ -456,6 +469,10 @@ const ChartBody = (props) => {
   }
 
   const drag = (e) => {
+    draggleID = e.target.id;
+    draggleClass = e.target.className;
+    draggleTag = e.target.tagName;
+
     if(method === 1 || lineDown) {
       reSize(e);
     }
@@ -486,9 +503,15 @@ const ChartBody = (props) => {
 
   const addChild = (e) => {
     if(method === 0 && state && selectedID) {
-      const scrollX = document.getElementById(`content${chartId}`).scrollLeft;
-      const relx = e.pageX + scrollX - unit.contentStart - 1;
-      const at = Math.ceil(relx/(parseInt(unit.markWidth) + 0.3))
+
+      // const scrollX = document.getElementById(`content${chartId}`).scrollLeft;
+      // const relx = e.pageX + scrollX - unit.contentStart - 1;
+      // const at = Math.ceil(relx/(parseInt(unit.markWidth) + 0.3));
+
+      const at = getSelectedColumnIndex() ;
+
+      console.log(at);
+
       const [i, j] = selectedID.split('-').slice(1);
       const [year, month] = projectData[displayData[i].name].start.split('.');
       let start;
@@ -508,7 +531,7 @@ const ChartBody = (props) => {
           break;
       }
 
-      const step = at - start - parseInt(j);
+      const step = at - start - parseInt(j) + 1;
       const length = displayData[parseInt(i)].data.length;
 
       if(isBoundary(start + step, start + (length -1) + step) && (parseInt(year) >= xMin.getFullYear())) { return false; }
@@ -699,6 +722,7 @@ const ChartBody = (props) => {
         draggleMethod(e);
         break;
       case 'mousemove':
+        
         changeCursor(e);
         if(mouseDown){
           if(method === 0) state = true;
